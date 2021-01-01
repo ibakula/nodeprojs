@@ -1,0 +1,31 @@
+{
+  "name": "nodeprojs",
+  "version": "0.0.0",
+  "description": "Excercise examples",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/ibakula/nodeprojs.git"
+  },
+  "keywords": [
+    "node",
+    "examples",
+    "programming",
+    "examples",
+    "node",
+    "projs"
+  ],
+  "author": "Ivan Bakula",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/ibakula/nodeprojs/issues"
+  },
+  "homepage": "https://github.com/ibakula/nodeprojs#readme",
+  "dependencies": {
+    "express": "^4.17.1",
+    "serve-index": "^1.9.1"
+  }
+}
