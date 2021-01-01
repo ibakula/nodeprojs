@@ -15,6 +15,6 @@ const options = {
     }
 }
 
-app.use('/', express.static('static', options), serveIndex('static'));
+app.use('/', express.static('./static', options), serveIndex('./static'));
 
 exports.app = app;
