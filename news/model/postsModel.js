@@ -3,7 +3,7 @@ const db = require('./databaseObject.js');
 const models = {
     selectPosts: function (params = null, res) {
         let sql = params != null ? ` WHERE id = ${params}` : "";
-        db.all(`SELECT * FROM posts${sql};`, function(err, rows) {
+        db.all(`SELECT * FROM posts${sql};`, err, rows => {
             if (err != undefined) {
                 console.error("postsModel SQL error: Could not obtain data!");
                 console.error(err.message);
@@ -13,7 +13,7 @@ const models = {
     },
     insertData: function (params = null, res) {
         db.run(`REPLACE INTO posts VALUES ('${params.id}', '${params.title}', '${params.text}', '${params.categoryId}', '${params.authorId}', '${params.date}');`,
-        function (err) {
+        err => {
             if (err != null) {
                 console.error("postsModel SQL error: Could not complete INSERT operation!");
                 console.error(err.message);
@@ -22,7 +22,7 @@ const models = {
     },
     removeData: function (params = null, res) {
         db.run(`DELETE FROM posts WHERE id = ${params};`,
-        function (err) {
+        err => {
             if (err != undefined) {
                 console.error("postsModel SQL error: Could not complete DELETE operation!");
                 console.error(err.message);
@@ -42,7 +42,7 @@ const models = {
         }
 
         db.run(`UPDATE posts SET ${sqlSet}WHERE id = ${id};`,
-        function (err) {
+        err => {
             if (err != undefined) {
                 console.error("postsModel SQL error: Could not complete UPDATE operation!");
                 console.error(err.message);
