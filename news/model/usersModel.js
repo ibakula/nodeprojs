@@ -12,7 +12,8 @@ const models = {
         });
     },
     insertData: function (params = null, res) {
-        db.run(`REPLACE INTO users VALUES ('${params.id}', '${params.firstName}', '${params.lastName}', '${params.email}', '${params.signupDate}', '${params.loginDate}');`,
+        db.run(`REPLACE INTO users VALUES ('${params.id}', '${params.firstName}', 
+        '${params.lastName}', '${params.email}', '${params.signupDate}', '${params.loginDate}');`,
         err => {
             if (err != null) {
                 console.error("usersModel SQL error: Could not complete INSERT operation!");

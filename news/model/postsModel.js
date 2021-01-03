@@ -12,7 +12,8 @@ const models = {
         });
     },
     insertData: function (params = null, res) {
-        db.run(`REPLACE INTO posts VALUES ('${params.id}', '${params.title}', '${params.text}', '${params.categoryId}', '${params.authorId}', '${params.date}');`,
+        db.run(`REPLACE INTO posts VALUES ('${params.id}', '${params.title}',
+        '${params.text}', '${params.categoryId}', '${params.authorId}', '${params.date}');`,
         err => {
             if (err != null) {
                 console.error("postsModel SQL error: Could not complete INSERT operation!");
