@@ -3,7 +3,7 @@ const db = require('./databaseObject.js');
 const models = {
     selectCategories: function (params = null, res) {
         let sql = params != null ? ` WHERE id = ${params}` : "";
-        db.all(`SELECT * FROM categories${sql};`, err, rows => {
+        db.all(`SELECT * FROM categories${sql};`, (err, rows) => {
             if (err != undefined) {
                 console.error("categoriesModel SQL error: Could not obtain data!");
                 console.error(err.message);

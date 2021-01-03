@@ -3,7 +3,7 @@ const db = require('./databaseObject.js');
 const models = {
     selectUsers: function (params = null, res) {
         let sql = params != null ? ` WHERE id = ${params}` : "";
-        db.all(`SELECT * FROM users${sql} LIMIT 5;`, err, rows => {
+        db.all(`SELECT * FROM users${sql} LIMIT 5;`, (err, rows) => {
             if (err != undefined) {
                 console.error("usersModel SQL error: Could not obtain data!");
                 console.error(err.message);
