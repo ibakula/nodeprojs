@@ -1,73 +1,53 @@
 const db = require('./databaseObject.js');
 
 const models = {
-    selectPosts: function (params = null) {
-        let result = [];
-        if (params == null) {
-            db.all("SELECT * FROM posts;", function(err = null, rows) {
-                if (err != null) {
-                    result = rows;
-                }
-                else {
-                    console.error("postsModel SQL error: Could not obtain data!");
-                    console.error(err.message);
-                }
-            });
-        }
-        else {
-            db.get(`SELECT * FROM posts WHERE id = ${params};`, function(err = null, row) {
-                if (err != null) {
-                    row !== 'undefined' ? result = row : result = {};
-                }
-                else {
-                    console.error("postsModel SQL error: Could not obtain data!");
-                    console.error(err.message);
-                }
-            });
-        }
-        return result;
+    selectPosts: function (params = null, res) {
+        let sql = params != null ? ` WHERE id = ${params}` : "";
+        db.all(`SELECT * FROM posts${sql};`, function(err, rows) {
+            if (err != undefined) {
+                console.error("postsModel SQL error: Could not obtain data!");
+                console.error(err.message);
+            }
+            res.json(rows);
+        });
     },
-    insertData: function (params = null) {
-        let errorMsg = null;
-        db.run(`REPLACE INTO posts VALUES (${params.id}, ${params.title}, ${params.text}, ${params.categoryId}, ${params.authorId}, ${params.date});`,
+    insertData: function (params = null, res) {
+        db.run(`REPLACE INTO posts VALUES ('${params.id}', '${params.title}', '${params.text}', '${params.categoryId}', '${params.authorId}', '${params.date}');`,
         function (err) {
             if (err != null) {
-                console.error("postsModel SQL error: Could not run an SQL query!");
+                console.error("postsModel SQL error: Could not complete INSERT operation!");
                 console.error(err.message);
-                errorMsg = err.message;
             }
         });
-        return errorMsg;
     },
-    removeData: function (params = null) {
-        let errorMsg = null;
-        db.run(`DELETE FROM posts WHERE id = ${params});`,
+    removeData: function (params = null, res) {
+        db.run(`DELETE FROM posts WHERE id = ${params};`,
         function (err) {
-            if (err != null) {
-                console.error("postsModel SQL error: Could not run an SQL query!");
+            if (err != undefined) {
+                console.error("postsModel SQL error: Could not complete DELETE operation!");
                 console.error(err.message);
-                errorMsg = err.message;
             }
         });
-        return errorMsg;
     },
-    updateData function (id, params) {
-        let errorMsg = null;
-        let sqlSet = ('title' in params ? `title = ${params.title} ` : "") +
-        ('text' in params ? `text = ${params.text} ` : "") +
-        ('categoryId' in params ? `category_id = ${params.categoryId} ` : "") +
-        ('authorId' in params ? `author_id = ${params.authorId} ` : "") +
-        ('date' in params ? `date = ${params.date} ` : "") +;
+    updateData: function (id, params, res) {
+        let sqlSet = ('title' in params ? `title = '${params.title}', ` : "") +
+        ('text' in params ? `text = '${params.text}', ` : "") +
+        ('categoryId' in params ? `category_id = '${params.categoryId}', ` : "") +
+        ('authorId' in params ? `author_id = '${params.authorId}', ` : "") +
+        ('date' in params ? `date = '${params.date}' ` : "");
         
-        db.run(`UPDATE posts SET ${sqlSet}WHERE id = ${id};);`,
+        if (sqlSet.endsWith(', ')) {
+            sqlSet = sqlSet.slice(0, (sqlSet.length - 2));
+            sqlSet += " ";
+        }
+
+        db.run(`UPDATE posts SET ${sqlSet}WHERE id = ${id};`,
         function (err) {
-            if (err != null) {
-                console.error("postsModel SQL error: Could not run an SQL query!");
+            if (err != undefined) {
+                console.error("postsModel SQL error: Could not complete UPDATE operation!");
                 console.error(err.message);
-                errorMsg = err.message;
             }
         });
-        return errorMsg;
     }
 };
 

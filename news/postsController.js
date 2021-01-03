@@ -1,36 +1,23 @@
-const model = require('./postsModel.js');
+const model = require('./postsModels.js');
 
 const controller = {
     getData: function(req, res, next) {
-        let result = model.selectPosts(('id' in req.params ? req.params.id : null));
-        res.json(result);
+        model.selectPosts(null, res);
+    },
+    getDataForId: function(req, res, next) {
+        model.selectPosts(req.params.id, res);
     },
     insertRequest: function(req, res, next) {
-        let message = model.insertData(req.body);
-        if (message != null) {
-            res.send(`Failure: ${message}`);
-        }
-        else {
-            res.send("Success!");
-        }
+        model.insertData(req.body, res);
+        res.send("Success!")
     },
     deleteRequest: function (req, res, next) {
-        let message = model.removeData(req.params.id);
-        if (message != null) {
-            res.send(`Failure: ${message}`);
-        }
-        else {
-            res.send("Success!");
-        }
+        model.removeData(req.params.id, res);
+        res.send("Success!")
     },
     updateRequest: function (req, res, next) {
-        let message = model.updateData(req.params.id, req.body);
-        if (message != null) {
-            res.send(`Failure: ${message}`);
-        }
-        else {
-            res.send("Success!");
-        }
+        model.updateData(req.params.id, req.body, res);
+        res.send("Success!")
     }
 };
 

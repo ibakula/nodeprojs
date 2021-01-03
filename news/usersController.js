@@ -1,18 +1,23 @@
-const model = require('./usersModel.js');
+const model = require('./usersModels.js');
 
 const controller = {
     getData: function(req, res, next) {
-        let result = model.selectUsers();
-        res.json(result);
+        model.selectUsers(null, res);
+    },
+    getDataForId: function(req, res, next) {
+        model.selectUsers(req.params.id, res);
     },
     insertRequest: function(req, res, next) {
-        // Do sth
+        model.insertData(req.body, res);
+        res.send("Success!")
     },
     deleteRequest: function (req, res, next) {
-        // Do sth
+        model.removeData(req.params.id, res);
+        res.send("Success!")
     },
     updateRequest: function (req, res, next) {
-        // Do sth
+        model.updateData(req.params.id, req.body, res);
+        res.send("Success!")
     }
 };
 
