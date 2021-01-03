@@ -1,8 +1,8 @@
 const express = require('express');
 const bodyParser = require('body-parser');
-const postsRouter = require('./posts.js');
-const categoriesRouter = require('./categories.js');
-const usersRouter = require('./users.js');
+const postsRouter = require('./router/posts.js');
+const categoriesRouter = require('./router/categories.js');
+const usersRouter = require('./router/users.js');
 const app = new express();
 
 app.use(bodyParser.urlencoded({ extended: true }));

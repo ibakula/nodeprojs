@@ -1,4 +1,4 @@
-const model = require('./categoriesModels.js');
+const model = require('../model/categoriesModel.js');
 
 const controller = {
     getData: function(req, res, next) {
