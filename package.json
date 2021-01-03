@@ -26,6 +26,8 @@
   "homepage": "https://github.com/ibakula/nodeprojs#readme",
   "dependencies": {
     "express": "^4.17.1",
-    "serve-index": "^1.9.1"
+    "promise": "^8.1.0",
+    "serve-index": "^1.9.1",
+    "sqlite3": "^5.0.0"
   }
 }
