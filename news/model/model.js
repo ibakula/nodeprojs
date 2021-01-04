@@ -112,4 +112,4 @@ const models = {
     }
 };
 
-module.exports = db;
+module.exports = models;
