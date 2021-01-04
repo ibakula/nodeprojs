@@ -1,9 +1,9 @@
-const sqlite = require('sqlite3').verbose();
+const sqlite = require('sqlite3');
 const errorHandler = require('./errorHandler');
 const db = new sqlite.Database("newsdb", errorHandler.handleDbOpen);
 
 function createInsertStatmentBasedOnTableName(table, params) {
-    let sql = `REPLACE INTO {$table} VALUES (`;
+    let sql = `REPLACE INTO ${table} VALUES (`;
         
     switch (table) {
         case 'posts':
@@ -21,8 +21,8 @@ function createInsertStatmentBasedOnTableName(table, params) {
     return sql;
 }
 
-function createUpdateStatementBasedOnTableName(table, params) {
-    let sqlSet = `UPDATE {$table} SET `;
+function createUpdateStatementBasedOnTableName(id, table, params) {
+    let sqlSet = `UPDATE ${table} SET `;
     
     switch(sqlSet) {
         case 'categories':
@@ -54,19 +54,19 @@ function createUpdateStatementBasedOnTableName(table, params) {
     return sqlSet;
 }
 
-const models = {
-    selectData: async function (table, id, limit = true) {
+const model = {
+    selectData: async function (table, id) {
         /*
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
         try {
-            let data = await db.all(`SELECT * FROM {$table} WHERE id = ${id} ` + (limit ? `AND id >= {$id} LIMIT 5;` : `;`));
+            let data = await db.all(`SELECT * FROM ${table} WHERE id = ${id};`);
             return data;
         }
         catch (err) {
             console.error("SQL error: Could not complete SELECT operation!");
             console.error(err.message);
-            throw new Error("An error with the query has occured!");
+            throw Error("An error with the query has occured!");
         }
     },
     insertData: async function (table, params) {
@@ -80,7 +80,7 @@ const models = {
         catch(err) {
             console.error("SQL error: Could not complete INSERT operation!");
             console.error(err.message);
-            throw new Error("An error with the query has occured!");
+            throw Error("An error with the query has occured!");
         }
     },
     removeData: function (table, params) {
@@ -88,28 +88,28 @@ const models = {
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
         try {
-            db.run(`DELETE FROM {$table} WHERE id = ${params};`);
+            db.run(`DELETE FROM ${table} WHERE id = ${params};`);
         }
         catch(err) {
             console.error("SQL error: Could not complete DELETE operation!");
             console.error(err.message);
-            throw new Error("An error with the query has occured!");
+            throw Error("An error with the query has occured!");
         }
     },
-    updateData: function (id, table, params, res) {
+    updateData: function (id, table, params) {
         /*
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
         try {
-            let sqlSet = createUpdateStatementBasedOnTableName(table, params);
+            let sqlSet = createUpdateStatementBasedOnTableName(id, table, params);
             db.run(sqlSet);
         }
         catch(err) {
             console.error("SQL error: Could not complete UPDATE operation!");
             console.error(err.message);
-            throw new Error("An error with the query has occured!");
+            throw Error("An error with the query has occured!");
         }
     }
 };
 
-module.exports = models;
+module.exports = model;

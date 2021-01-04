@@ -1,23 +1,45 @@
-const model = require('../model/categoriesModel.js');
+const model = require('../model/model.js');
 
 const controller = {
-    getData: function(req, res, next) {
-        model.selectCategories(null, res);
+    getData: async function(req, res, next) {
+        try {
+            let result = model.selectData('categories', req.params.id);
+            console.log("Serving categories data");
+            res.json(result);
+        }
+        catch (err) {
+            res.send("An error has occured!");
+        }
     },
-    getDataForId: function(req, res, next) {
-        model.selectCategories(req.params.id, res);
+    insertRequest: async function(req, res, next) {
+        try {
+            insertData('categories', req.params);
+            console.log("Executed an INSERT query");
+            res.send("Success!");
+        }
+        catch (err) {
+            res.send("An error has occured!");
+        }
     },
-    insertRequest: function(req, res, next) {
-        model.insertData(req.body, res);
-        res.send("Success!")
+    deleteRequest: async function (req, res, next) {
+        try {
+            model.removeData('categories', req.params.id);
+            console.log("Executed a DELETE query");
+            res.json(result);
+        }
+        catch (err) {
+            res.send("An error has occured!");
+        }
     },
-    deleteRequest: function (req, res, next) {
-        model.removeData(req.params.id, res);
-        res.send("Success!")
-    },
-    updateRequest: function (req, res, next) {
-        model.updateData(req.params.id, req.body, res);
-        res.send("Success!")
+    updateRequest: async function (req, res, next) {
+        try {
+            model.updateData(req.param.id, 'categories', req.body);
+            console.log("Executed an UPDATE query");
+            res.json(result);
+        }
+        catch (err) {
+            res.send("An error has occured!");
+        }
     }
 };
 
