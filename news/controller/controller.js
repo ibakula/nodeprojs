@@ -34,8 +34,8 @@ const controller = {
         }
         model.updateData(route_name, next);
     },
-    handleRequest : (req, res, data, next) => {
-        res.json(data);
+    handleRequest: (req, res, data, next) => {
+        res.json(data != undefined ? data : {});
     }
 };
 
