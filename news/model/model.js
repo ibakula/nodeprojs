@@ -52,8 +52,8 @@ function containsValidInput(table, params) {
                         return false;
                     }
                 }
-                if (postsStruct[i].search("FROM") > -1 ||
-                postsStruct[i].search("INTO") > -1)  { // Queries not permitted!
+                if (params[i].search("INTO") > -1 || // Unpermitted word
+                params[i].search("FROM") > -1)  { // Queries not permitted!
                     return false;
                 }
                 hasRequiredParams = true;
@@ -123,7 +123,7 @@ const model = {
     selectData: (table, next) => {
         // Validity check, prevent execution of a query if false    
         if (!containsValidInput(table, next.request.params)) {
-            next.handleRequest(next.request, next.respond, {}, null);
+            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
             return;
         }
         
@@ -141,10 +141,10 @@ const model = {
     },
     insertData: (table, next) => {
         // Validity check, prevent execution of a query if false  
-        //if (!containsValidInput(table, next.request.params)) {
-        //    next.handleRequest(next.request, next.respond, {}, null);
-        //    return;
-        //}
+        if (!containsValidInput(table, next.request.params)) {
+            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            return;
+        }
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body);
         db.run(sql, (err) => {
             if (err != null) {
@@ -160,10 +160,10 @@ const model = {
     },
     removeData: (table, next) => {
         // Validity check, prevent execution of a query if false
-        //if (!containsValidInput(table, next.request.params)) {
-        //    next.handleRequest(next.request, next.respond, {}, null);
-        //    return;
-        //}
+        if (!containsValidInput(table, next.request.params)) {
+            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            return;
+        }
         db.run(`DELETE FROM ${table} WHERE id = ${next.request.params.id};`, (err) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, { result: `Failure!` }, null);
@@ -178,12 +178,11 @@ const model = {
     },
     updateData: (table, next) => {
         // Validity check, prevent execution of a query if false
-        //if (!containsValidInput(table, next.request.params)) {
-        //    next.handleRequest(next.request, next.respond, {}, null);
-        //    return;
-        //}
+        if (!containsValidInput(table, next.request.body)) {
+            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            return;
+        }
         let sqlSet = createUpdateStatementBasedOnTableName(table, next.request.body, next.request.params.id);
-        console.log(sqlSet);
         db.run(sqlSet, (err) => {
             if (err != null) {
                 next.handleRequest(next.request,next.respond,{ result: `Failure!` }, null);
