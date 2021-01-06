@@ -1,4 +1,4 @@
-const sqlite = require('sqlite3');
+const sqlite = require('sqlite3').verbose();
 const errorHandler = require('./errorHandler');
 const db = new sqlite.Database("newsdb", errorHandler.handleDbOpen);
 
@@ -21,12 +21,12 @@ function createInsertStatmentBasedOnTableName(table, params) {
     return sql;
 }
 
-function createUpdateStatementBasedOnTableName(id, table, params) {
+function createUpdateStatementBasedOnTableName(table, params) {
     let sqlSet = `UPDATE ${table} SET `;
     
     switch(sqlSet) {
         case 'categories':
-            sqlSet += `title = ${params.title} WHERE id = ${id};`;
+            sqlSet += `title = ${params.title} WHERE id = ${params.id};`;
             break;
         case 'posts':
             sqlSet = ('title' in params ? `title = '${params.title}', ` : "") +
@@ -55,60 +55,71 @@ function createUpdateStatementBasedOnTableName(id, table, params) {
 }
 
 const model = {
-    selectData: async function (table, id) {
+    selectData: (table, next) => {
         /*
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
-        try {
-            let data = await db.all(`SELECT * FROM ${table} WHERE id = ${id};`);
-            return data;
-        }
-        catch (err) {
-            console.error("SQL error: Could not complete SELECT operation!");
-            console.error(err.message);
-            throw Error("An error with the query has occured!");
-        }
+        db.all(`SELECT * FROM ${table} WHERE id = ${next.request.params.id};`, (err, rows) => {
+            if (err != null) {
+                next.handleRequest(next.request, next.respond, {}, null);
+                console.error(`${table}: Could not complete SELECT operation!`);
+                console.error(err.message);
+            }
+            else {
+                next.handleRequest(next.request, next.respond, (rows.length > 1 ? rows : rows[0]), null);
+                console.log(`${table}: Completed SELECT operation!`);
+            }
+        });
     },
-    insertData: async function (table, params) {
+    insertData: (table, next) => {
         /*
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
-        try {
-            let sql = createInsertStatmentBasedOnTableName(table, params);
-            db.run(sql);
-        }
-        catch(err) {
-            console.error("SQL error: Could not complete INSERT operation!");
-            console.error(err.message);
-            throw Error("An error with the query has occured!");
-        }
+        let sql = createInsertStatmentBasedOnTableName(table, next.req.params);
+        db.run(sql, (err) => {
+            if (err) {
+                next.handleRequest(next.request, next.respond, { result: "Failure!" }, null);
+                console.error(`${table}: Could not complete INSERT operation!`);
+                console.error(err.message);
+            }
+            else {
+                next.handleRequest(next.request,next.respond,{ result: "Success!" }, null);
+                console.log(`${table}: Completed INSERT operation!`);
+            }
+        });
     },
-    removeData: function (table, params) {
+    removeData: (table, next) => {
         /*
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
-        try {
-            db.run(`DELETE FROM ${table} WHERE id = ${params};`);
-        }
-        catch(err) {
-            console.error("SQL error: Could not complete DELETE operation!");
-            console.error(err.message);
-            throw Error("An error with the query has occured!");
-        }
+        db.run(`DELETE FROM ${table} WHERE id = ${next.req.params.id};`, (err) => {
+            if (err) {
+                next.handleRequest(next.request,next.respond,{ result: "Failure!" }, null);
+                console.error(`${table}: Could not complete DELETE operation!`);
+                console.error(err.message);
+            }
+            else {
+                next.handleRequest(next.request,next.respond,{ result: "Success!" }, null);
+                console.log(`${table}: Completed DELETE operation!`);
+            }
+        });
     },
-    updateData: function (id, table, params) {
+    updateData: (table, next) => {
         /*
             TODO: PARAMETERS DATA VALIDITY CHECK HERE
         */
-        try {
-            let sqlSet = createUpdateStatementBasedOnTableName(id, table, params);
-            db.run(sqlSet);
-        }
-        catch(err) {
-            console.error("SQL error: Could not complete UPDATE operation!");
-            console.error(err.message);
-            throw Error("An error with the query has occured!");
-        }
+        let sqlSet = createUpdateStatementBasedOnTableName(table, next.req.params);
+        db.run(sqlSet, (err) => {
+            if (err) {
+                next.handleRequest(next.request,next.respond,{ result: "Failure!" }, null);
+                console.error(`${table}: Could not complete UPDATE operation!`);
+                console.error(err.message);
+            }
+            else {
+                next.handleRequest(next.request,next.respond,{ result: "Success!" }, null);
+                console.log(`${table}: Completed UPDATE operation!`);
+            }
+        });
     }
 };
 
