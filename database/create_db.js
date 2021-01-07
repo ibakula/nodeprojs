@@ -1,5 +1,4 @@
 const sqlite = require('sqlite3').verbose();
-const promise = require('promise');
 const errorHandler = require('../model/errorHandler');
 const db = new sqlite.Database("./news.db", errorHandler.handleDbOpen);
 
