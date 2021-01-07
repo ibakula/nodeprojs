@@ -1,7 +1,7 @@
 {
   "name": "nodeprojs",
   "version": "0.0.0",
-  "description": "Excercise examples",
+  "description": "Node application, blog website",
   "main": "main.js",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
@@ -27,10 +27,7 @@
   "dependencies": {
     "body-parser": "^1.19.0",
     "express": "^4.17.1",
-    "polka": "^0.5.2",
-    "promise": "^8.1.0",
     "serve-index": "^1.9.1",
-    "sqlite-async": "^1.1.1",
     "sqlite3": "^5.0.0"
   }
 }
