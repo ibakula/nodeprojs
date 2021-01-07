@@ -1,6 +1,6 @@
 const sqlite = require('sqlite3').verbose();
 const errorHandler = require('./errorHandler');
-const db = new sqlite.Database('./news.db', errorHandler.handleDbOpen);
+const db = new sqlite.Database('./database/news.db', errorHandler.handleDbOpen);
 
 const usersStruct = {
     'id' : 'number',
