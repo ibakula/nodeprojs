@@ -53,7 +53,7 @@ function containsValidInput(table, params) {
                     }
                 }
                 if (params[i].search("INTO") > -1 || // Unpermitted word
-                params[i].search("FROM") > -1)  { // Queries not permitted!
+                    params[i].search("FROM") > -1)  { // Queries not permitted!
                     return false;
                 }
                 hasRequiredParams = true;
@@ -141,7 +141,7 @@ const model = {
     },
     insertData: (table, next) => {
         // Validity check, prevent execution of a query if false  
-        if (!containsValidInput(table, next.request.params)) {
+        if (!containsValidInput(table, next.request.body)) {
             next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
             return;
         }
