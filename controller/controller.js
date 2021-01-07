@@ -2,7 +2,6 @@ const model = require('../model/model.js');
 
 const controller = {
     getData: (req, res, route_name, next) => {
-        let that = this;
         next = {
             handleRequest: controller.handleRequest,
             request: req,
