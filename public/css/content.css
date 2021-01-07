@@ -1,0 +1,41 @@
+section#content main,  section#content > section {
+    border-right:1px solid #e8e9ea;
+}
+
+@media (max-width: 576px) {
+    section#content main, section#content > section {
+        border-right:none;
+    }
+    section#content aside {
+        margin-top:1em;
+    }
+    section#content {
+        margin-bottom:2em;
+    }
+}
+
+section#content main article, section#content > section article {
+    overflow-wrap:anywhere;
+    hyphens:auto;
+    border-bottom:1px solid #e8e9ea;
+    margin-bottom:1em;
+    padding:1em;
+}
+
+section#content main article div + div {
+    overflow: hidden!important;
+}
+
+section#content main article:last-child {
+    border-bottom:none;
+}
+
+section#content main article:hover {
+    border:1px solid #e8e9ea;
+    border-collapse:collapse;
+    border-radius:1.5ex;
+}
+
+section#content aside {
+    margin-left:20px;
+}

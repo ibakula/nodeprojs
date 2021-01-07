@@ -1,0 +1,62 @@
+section#featured {
+    background-color:#e3e3e3;
+    /* Start: This is just default ruleset for images displayed */
+    background-repeat:no-repeat;
+    background-position:center center;
+    background-origin:border-box;
+    /* End: This is just default ruleset for images displayed */
+    width:100%;
+    height:300px;
+    position:relative;
+    padding:0;
+    margin:0;
+}
+
+/* Carousel left/right styling rules */
+section#featured > div {
+    width:80%;
+    height:80%
+}
+
+section#featured div > div {
+    text-align:center;
+    width:100%;
+    height:85%;
+    overflow:hidden;
+    padding-top:0.5em;
+}
+
+section#featured div a {
+    font-size:3em;
+}
+
+section#featured div a:hover {
+    text-decoration:none;
+}
+
+section#featured div a#left {
+    position:absolute;
+    top: calc(50% - 2ex);
+    left:30px;
+    background-color:#000000a1;
+}
+
+section#featured div a#right {
+    position:absolute;
+    top:calc(50% - 2ex);
+    right:30px;
+    background-color:#000000a1;
+}
+
+/* Ref. to div container for carousel text */
+section#featured div div h2{
+    display:inline;
+    z-index:5;
+}
+
+section#featured div div p, section#featured div div h2 {
+    background-color:#000000a1;
+    text-overflow:ellipsis;
+    white-space: nowrap;
+    overflow: hidden;
+}

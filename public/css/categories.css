@@ -1,0 +1,16 @@
+#content h2:hover {
+    color:black!important;
+    background-color:initial!important;
+    border:1px solid black;
+    padding-left:2rem!important;
+    word-break:break-all;
+}
+
+.h2-width-240 {
+    width: 240px;
+}
+
+.h2-width-280 {
+    width: 280px;
+}
+

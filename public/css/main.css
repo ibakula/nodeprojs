@@ -1,0 +1,59 @@
+header#top nav,
+header#top nav div ul,
+header#top nav div ul li ul {
+    width:100%;
+}
+
+header#top nav ul {
+    flex-grow: 1;
+}
+
+header#top nav ul li ul li a {
+    white-space:pre-wrap;
+}
+
+header#top div nav div div ul li + li ul {
+    justify-content:flex-end;
+}
+
+footer {
+    padding:1.5em;
+    text-align:center;
+    position:relative;
+    bottom:0px;
+}
+
+.row {
+    margin-left:0!important;
+    margin-right:0!important;
+}
+
+img {
+    border: 1px solid #898989;
+}
+
+a:hover {
+    text-decoration:none;
+}
+
+section#subscription {
+    background-color:#e2e2e235;
+}
+
+.form-control:focus {
+    color:#495057;
+    border-color:#ced4da;
+    box-shadow:none;
+}
+
+input[type="text"]:valid, input[type="password"]:valid, input[type="email"]:valid, textarea.form-control:valid {
+    border-color:#ced4da;
+}
+
+input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focus, textarea.form-control:focus {
+    border-color:#ced4da!important;
+}
+
+input[type="text"]:invalid, input[type="password"]:invalid, input[type="email"]:invalid, textarea:invalid {
+    border-color:#ffa1a1;
+}
