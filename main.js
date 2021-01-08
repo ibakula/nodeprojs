@@ -22,7 +22,7 @@ app.use('/api', session({
     resave: true, 
     saveUninitialized: false, 
     cookie: { 
-        path: '/', 
+        path: '/api', 
         httpOnly: false, 
         secure: false, 
         maxAge: null, 
