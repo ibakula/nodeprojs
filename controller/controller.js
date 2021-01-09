@@ -35,6 +35,11 @@ const controller = {
     },
     handleRequest: (req, res, data, next) => {
         res.json(data != undefined ? data : {});
+    },
+    handleLogin: (req, res, data, next) => {
+        
+    },
+    handleRegister: (req, res, data, next) => {
     }
 };
 
