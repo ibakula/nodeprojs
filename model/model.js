@@ -6,7 +6,10 @@ const usersStruct = {
     'id' : 'number',
     'firstName' : 'string',
     'lastName' : 'string',
+    'password' : 'string',
     'email' : 'string',
+    // 0 - user, 1 - Author/Editor, 2 - Moderator, 3 - Admin
+    'permissions' : 'number',
     'signupDate' : 'string',
     'loginDate' : 'string' 
 };
@@ -119,11 +122,52 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
     return sqlSet;
 }
 
+// Intended usage on insert, update and remove methods
+function hasPermissions(table, method, userId, params) {
+    let reqPermission = 3;
+    switch (table) {
+        case 'posts':
+            reqPermission = 1;
+            break;
+        case 'users':
+            if ((userId == false && 
+                method == 'INSERT') || 
+                (params.id == userId && 
+                method == 'UPDATE')) {
+                return true;
+            }
+            break;
+        case 'categories':
+            reqPermission = 1;
+        case 'comments':
+            // ToDo: Allow user to delete/update own commentaries
+            break;
+    }
+
+    if (userId == false) {
+        return false;
+    }
+
+    db.get(`SELECT permissions FROM users WHERE id = ${userId};`,
+    (err, row) => {
+        if (err != null ||
+            row == undefined) {
+            return false;
+        }
+        else {
+            if (row['permissions'] >= reqPermission) {
+                return true;
+            }
+        }
+    });
+    return false;
+}
+
 const model = {
     selectData: (table, next) => {
         // Validity check, prevent execution of a query if false    
         if (!containsValidInput(table, next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
             return;
         }
         
@@ -140,9 +184,13 @@ const model = {
         });
     },
     insertData: (table, next) => {
+        if (!hasPermissions(table, 'INSERT', ('userId' in next.request.session ? next.request.session.userId : false), next.request.body)) {
+            next.handleRequest(next.request, next.respond, {'result':'Failure!', 'reason':'You do not have the required permissions!'}, null);
+            return;
+        }
         // Validity check, prevent execution of a query if false  
         if (!containsValidInput(table, next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
             return;
         }
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body);
@@ -159,9 +207,19 @@ const model = {
         });
     },
     removeData: (table, next) => {
+        if (('id' in next.request.body)) {
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'cannot include id in post method'}, null);
+            return;
+        }
+        if (!hasPermissions(table, 'REMOVE',
+           ('userId' in next.request.session ? next.request.session.userId : false),
+            next.request.params)) {
+            next.handleRequest(next.request, next.respond, {'result':'Failure!', 'reason':'You do not have the required permissions!'}, null);
+            return;
+        }
         // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
             return;
         }
         db.run(`DELETE FROM ${table} WHERE id = ${next.request.params.id};`, (err) => {
@@ -177,9 +235,19 @@ const model = {
         });
     },
     updateData: (table, next) => {
+        if (('id' in next.request.body)) {
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'cannot include id in post method'}, null);
+            return;
+        }
+        if (!hasPermissions(table, 'INSERT',
+           ('userId' in next.request.session ? next.request.session.userId : false),
+            next.request.params)) {
+            next.handleRequest(next.request, next.respond, {'result':'Failure!', 'reason':'You do not have the required permissions!'}, null);
+            return;
+        }
         // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'input compliance fallthrough!'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
             return;
         }
         let sqlSet = createUpdateStatementBasedOnTableName(table, next.request.body, next.request.params.id);
