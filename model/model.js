@@ -56,7 +56,9 @@ function containsValidInput(table, params) {
                     }
                 }
                 if (params[i].search("INTO") > -1 || // Unpermitted word
-                    params[i].search("FROM") > -1)  { // Queries not permitted!
+                    params[i].search("FROM") > -1 ||
+                    (i == 'email' && 
+                    params[i].search("@") == -1))  {
                     return false;
                 }
                 hasRequiredParams = true;
@@ -167,7 +169,8 @@ const model = {
     selectData: (table, next) => {
         // Validity check, prevent execution of a query if false    
         if (!containsValidInput(table, next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 
+            'reason':'input compliance fallthrough'}, null);
             return;
         }
         
@@ -185,18 +188,22 @@ const model = {
     },
     insertData: (table, next) => {
         if (!hasPermissions(table, 'INSERT', ('userId' in next.request.session ? next.request.session.userId : false), next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failure!', 'reason':'You do not have the required permissions!'}, null);
+            next.handleRequest(next.request, next.respond, 
+            {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
+            null);
             return;
         }
         // Validity check, prevent execution of a query if false  
         if (!containsValidInput(table, next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failed!', 
+            'reason':'input compliance fallthrough'}, null);
             return;
         }
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body);
         db.run(sql, (err) => {
             if (err != null) {
-                next.handleRequest(next.request, next.respond, { result: `Failure!` }, null);
+                next.handleRequest(next.request, next.respond, 
+                { result: `Failure!` }, null);
                 console.error(`${table}: Could not complete INSERT operation!`);
                 console.error(err.message);
             }
@@ -208,18 +215,23 @@ const model = {
     },
     removeData: (table, next) => {
         if (('id' in next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'cannot include id in post method'}, null);
+            next.handleRequest(next.request, next.respond, 
+            {'result':'Failed!', 'reason':'cannot include id in post method'}, 
+            null);
             return;
         }
         if (!hasPermissions(table, 'REMOVE',
            ('userId' in next.request.session ? next.request.session.userId : false),
             next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failure!', 'reason':'You do not have the required permissions!'}, null);
+            next.handleRequest(next.request, next.respond, 
+            {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
+            null);
             return;
         }
         // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
+            next.handleRequest(next.request, next.respond,
+            {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
             return;
         }
         db.run(`DELETE FROM ${table} WHERE id = ${next.request.params.id};`, (err) => {
@@ -236,24 +248,29 @@ const model = {
     },
     updateData: (table, next) => {
         if (('id' in next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'cannot include id in post method'}, null);
+            next.handleRequest(next.request, next.respond, 
+            {'result':'Failed!', 'reason':'cannot include id in post method'}, 
+            null);
             return;
         }
         if (!hasPermissions(table, 'INSERT',
            ('userId' in next.request.session ? next.request.session.userId : false),
             next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failure!', 'reason':'You do not have the required permissions!'}, null);
+            next.handleRequest(next.request, next.respond, {'result':'Failure!',
+             'reason':'You do not have the required permissions!'}, null);
             return;
         }
         // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.body)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
+            next.handleRequest(next.request, next.respond, 
+            {'result':'Failed!', 'reason':'input compliance fallthrough'},
+             null);
             return;
         }
         let sqlSet = createUpdateStatementBasedOnTableName(table, next.request.body, next.request.params.id);
         db.run(sqlSet, (err) => {
             if (err != null) {
-                next.handleRequest(next.request,next.respond,{ result: `Failure!` }, null);
+                next.handleRequest(next.request,next.respond,{ result: `Failed!` }, null);
                 console.error(`${table}: Could not complete UPDATE operation!`);
                 console.error(err.message);
             }
@@ -262,6 +279,43 @@ const model = {
                 console.log(`${table}: Completed UPDATE operation!`);
             }
         });
+    },
+    userLogin: (req, res, next) => { 
+        if ((!('email' in req.body) && !('password' in req.body)) || 
+            (req.body.email.length < 3 || req.body.password.length < 3)) {
+            next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+            return;
+        }
+        // Check validity of the data
+        if (!containsValidInput('users', req.body)) {
+            next(next.request, next.respond,
+            {'result':'Failed!', 'reason':'input compliance fallthrough'},
+             null);
+            return;
+        }
+    },
+    userRegister: (req, res, next) => {
+        if (!('email' in req.body) ||
+            !('password' in req.body) ||
+            !('firstName' in req.body) ||
+            !('lastName' in req.body)) {
+            next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+            return;
+        }
+        for (let i of req.body) {
+             if (req.body.i.length < 3) {
+                 next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                 return;
+             }
+        }
+        // Check validity of the data
+        if (!containsValidInput('users', req.body)) {
+            next(next.request, next.respond,
+            {'result':'Failed!', 'reason':'input compliance fallthrough'},
+             null);
+            return;
+        }
+        
     }
 };
 

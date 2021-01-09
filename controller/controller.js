@@ -37,9 +37,12 @@ const controller = {
         res.json(data != undefined ? data : {});
     },
     handleLogin: (req, res, data, next) => {
-        
+        model.userLogin(req, res, 
+            controller.handleRequest);
     },
     handleRegister: (req, res, data, next) => {
+        model.userRegister(req, res, 
+            controller.handleRequest);
     }
 };
 
