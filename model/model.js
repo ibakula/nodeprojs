@@ -73,19 +73,21 @@ function containsValidInput(table, params) {
 }
 
 function createInsertStatmentBasedOnTableName(table, params) {
-    let sql = `REPLACE INTO ${table} VALUES (`;
-        
+    let sql = `REPLACE INTO ${table}`;
+
     switch (table) {
         case `posts`:
-            sql += `'${params.id}', '${params.title}', '${params.text}',
-            '${params.categoryId}', '${params.authorId}', '${params.date}');`;
+            let now = Date.now();
+            sql += `(title, text, category_id, author_id, date) VALUES ('${params.title}', '${params.text}',
+            '${params.categoryId}', '${params.authorId}', '${now}');`;
             break;
         case `categories`:
-            sql += `'${params.id}', '${params.title}');`;
+            sql += `(title) VALUES('${params.title}');`;
             break;
         case `users`:
-            sql += `'${params.id}', '${params.firstName}', '${params.lastName}',
-            '${params.email}', '${params.signupDate}', '${params.loginDate}');`;
+            let now = Date.now();
+            sql += `(first_name, last_name, password, email, signup_date, login_date) VALUES ('${params.firstName}', '${params.lastName}',
+            '${params.email}', '${now}', '0');`;
             break;
     }
     return sql;
