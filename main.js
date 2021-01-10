@@ -17,6 +17,7 @@ app.use('/', serveStatic('./public', {
 
 // API ROUTE SESSION CONFIGURATION
 app.use('/api', session({ 
+    key: 'apiSession',
     secret: 'dwelltime!toBereckondWith', 
     store: new sessionStore({ db: 'sessions.db', dir: './database' }), 
     resave: true, 
@@ -24,7 +25,7 @@ app.use('/api', session({
     cookie: { 
         path: '/api', 
         httpOnly: false, 
-        secure: false, 
+        secure: true, 
         maxAge: null, 
         sameSite: 'strict', 
         name: 'api'
