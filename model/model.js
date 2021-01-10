@@ -194,12 +194,12 @@ const model = {
                 !('password' in next.request.body) ||
                 !('firstName' in next.request.body) ||
                 !('lastName' in next.request.body)) {
-                next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                next.handleRequest(next.request, next.respond, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
                 return;
             }
             for (let i of req.body) {
                 if (req.body[i].length < 3) {
-                    next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                    next.handleRequest(next.request, next.respond, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
                     return;
                 }
             }
