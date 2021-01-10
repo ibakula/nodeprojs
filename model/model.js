@@ -187,6 +187,22 @@ const model = {
         });
     },
     insertData: (table, next) => {
+        if (table == 'users') {
+            if (!('email' in next.request.body) ||
+                !('password' in next.request.body) ||
+                !('firstName' in next.request.body) ||
+                !('lastName' in next.request.body)) {
+                next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                return;
+            }
+            for (let i of req.body) {
+                if (req.body[i].length < 3) {
+                    next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                    return;
+                }
+            }
+        }
+
         if (!hasPermissions(table, 'INSERT', ('userId' in next.request.session ? next.request.session.userId : false), next.request.body)) {
             next.handleRequest(next.request, next.respond, 
             {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
@@ -293,29 +309,26 @@ const model = {
              null);
             return;
         }
-    },
-    userRegister: (req, res, next) => {
-        if (!('email' in req.body) ||
-            !('password' in req.body) ||
-            !('firstName' in req.body) ||
-            !('lastName' in req.body)) {
-            next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
-            return;
-        }
-        for (let i of req.body) {
-             if (req.body.i.length < 3) {
-                 next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
-                 return;
-             }
-        }
-        // Check validity of the data
-        if (!containsValidInput('users', req.body)) {
-            next(next.request, next.respond,
-            {'result':'Failed!', 'reason':'input compliance fallthrough'},
-             null);
-            return;
-        }
-        
+        db.get(`SELECT id, password FROM users WHERE email = ${req.body.email}`, (err, row) => {
+            if (err) {
+                console.error("An DB error has occured executing userLogin");
+                console.error(err.message);
+            }
+            else {
+                if (row == undefined || row['password'] != req.body['password']) {
+                   next(req, res, { 'result' : 'Failed!', 'reason' : 'Invalid email/password' }, null);
+                }
+                else {
+                    req.session.userId = row['id'];
+                    req.session.save(err => {
+                        if (err) {
+                            console.error("Couldnt save session on userLogin!");
+                            console.error(err.message);
+                        }
+                    });
+                }
+            }
+        });
     }
 };
 

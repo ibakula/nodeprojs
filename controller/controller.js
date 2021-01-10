@@ -40,10 +40,6 @@ const controller = {
         model.userLogin(req, res, 
             controller.handleRequest);
     },
-    handleRegister: (req, res, data, next) => {
-        model.userRegister(req, res, 
-            controller.handleRequest);
-    },
     handleLogout: (req, res, data, next) => {
         res.cookie.clearCookie('apiSession', { path: '/api' });
         req.session.destroy(err => {
@@ -54,15 +50,14 @@ const controller = {
             else {
                  req.session.regenerate(err => {
                      if (err) {
+                         console.error("Logout handler failur to generate a new session");
                          console.error(err.message);
                      }
                  });
             }
         });
 
-        if (next) {
-            next();
-        }
+        controller.handleRequest(req, res, { 'result' : 'Success!' }, next);
     }
 };
 
