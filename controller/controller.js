@@ -43,6 +43,23 @@ const controller = {
     handleRegister: (req, res, data, next) => {
         model.userRegister(req, res, 
             controller.handleRequest);
+    },
+    handleLogout: (req, res, data, next) => {
+        res.cookie.clearCookie('apiSession', { path: '/api' });
+        req.session.destroy(err => {
+            if (err) {
+                console.error("Could not destroy session");
+                console.error(err.message);
+            }
+            else {
+                 req.session.regenerate(err => {
+                     if (err) {
+                         console.error(err.message);
+                     }
+                 });
+            }
+        });
+        next();
     }
 };
 

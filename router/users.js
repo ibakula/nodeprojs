@@ -17,5 +17,6 @@ router.delete('/:id', (req, res, next) => {
 
 router.post('/login', controller.handleLogin);
 router.post('/register', controller.handleRegister);
+router.get('/logout', controller.handleLogout);
 
 module.exports = router;
