@@ -86,8 +86,8 @@ function createInsertStatmentBasedOnTableName(table, params) {
             break;
         case `users`:
             let now = Date.now();
-            sql += `(first_name, last_name, password, email, signup_date, login_date) VALUES ('${params.firstName}', '${params.lastName}',
-            '${params.email}', '${now}', '0');`;
+            sql += `(first_name, last_name, password, email, signup_date, login_date)
+            VALUES ('${params.firstName}', '${params.lastName}', '${params.password}', '${params.email}', '${now}', '0');`;
             break;
     }
     return sql;
