@@ -311,7 +311,7 @@ const model = {
              null);
             return;
         }
-        db.get(`SELECT id, password FROM users WHERE email = ${req.body.email}`, (err, row) => {
+        db.get(`SELECT id, password FROM users WHERE email = '${req.body.email}'`, (err, row) => {
             if (err) {
                 console.error("An DB error has occured executing userLogin");
                 console.error(err.message);
@@ -330,6 +330,7 @@ const model = {
                     });
                 }
             }
+            next(req, res, {'result' : 'Success!'}, null);
         });
     }
 };
