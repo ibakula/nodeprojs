@@ -59,7 +59,10 @@ const controller = {
                  });
             }
         });
-        next();
+
+        if (next) {
+            next();
+        }
     }
 };
 
