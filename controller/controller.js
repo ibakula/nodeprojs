@@ -44,7 +44,7 @@ const controller = {
         model.userLogin(req, res, controller.handleRequest);
     },
     handleLogout: (req, res, data, next) => {
-        res.cookie.clearCookie('sessionId', { path: '/api' });
+        res.clearCookie('sessionId', { path: '/api' });
         req.session.destroy(err => {
             if (err) {
                 console.error("Could not destroy session");
