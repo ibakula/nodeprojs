@@ -36,7 +36,7 @@ const controller = {
     handleRequest: (req, res, data, next) => {
         res.json(data != undefined ? data : {});
         console.log(req.sessionID);
-        //console.log(req.session.userId);
+        console.log(req.session.userId);
         console.log(req.cookies);
     },
     handleLogin: (req, res, next) => {
@@ -46,18 +46,10 @@ const controller = {
     handleLogout: (req, res, next) => {
         console.log("YOU SEE ME!");
         res.clearCookie('sessionId', { path: '/api' });
-        req.session.destroy(err => {
+        req.session.regenerate(err => {
             if (err) {
-                console.error("Could not destroy session");
+                console.error("Could not regenerate session");
                 console.error(err.message);
-            }
-            else {
-                 req.session.regenerate(err => {
-                     if (err) {
-                         console.error("Logout handler failur to generate a new session");
-                         console.error(err.message);
-                     }
-                 });
             }
         });
 
