@@ -318,7 +318,8 @@ const model = {
             }
             else {
                 if (row == undefined || row['password'] != req.body['password']) {
-                   next(req, res, { 'result' : 'Failed!', 'reason' : 'Invalid email/password' }, null);
+                    next(req, res, { 'result' : 'Failed!', 'reason' : 'Invalid email/password' }, null);
+                    return;
                 }
                 else {
                     req.session.userId = row['id'];
