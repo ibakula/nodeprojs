@@ -24,9 +24,15 @@ const postsStruct = {
 };
 
 const categoriesStruct = {
-    'id': 'number', 
-    'title': 'string'
+    'id' : 'number', 
+    'title' : 'string'
 };
+
+const commentsStruct = {
+    'post_id' : 'number',
+    'text' : 'string',
+    'date' : 'string'
+}
 
 function containsValidInput(table, params) {
     let struct = null;
