@@ -271,7 +271,7 @@ const model = {
             null);
             return;
         }
-        if (!hasPermissions(table, 'INSERT',
+        if (!hasPermissions(table, 'UPDATE',
            ('userId' in next.request.session ? next.request.session.userId : false),
             next.request.params)) {
             next.handleRequest(next.request, next.respond, {'result':'Failure!',
