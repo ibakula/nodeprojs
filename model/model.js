@@ -108,7 +108,7 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             ('date' in params ? `date = '${params.date}' ` : "");
             break;
         case `users`:
-            sqlSet += ('firstName' in params ? `title = '${params.firstName}', ` : '') +
+            sqlSet += ('firstName' in params ? `first_name = '${params.firstName}', ` : '') +
             ('lastName' in params ? `last_name = '${params.lastName}', ` : '') +
             ('email' in params ? `email = '${params.email}', ` : '') +
             ('signupDate' in params ? `signup_date = '${params.signupDate}', ` : '') +
