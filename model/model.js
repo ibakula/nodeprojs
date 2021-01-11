@@ -20,6 +20,7 @@ const postsStruct = {
     'text' : 'string',
     'categoryId' : 'number',
     'authorId' : 'number',
+    'views' : 'number'
     'date' : 'string'
 };
 
@@ -29,9 +30,11 @@ const categoriesStruct = {
 };
 
 const commentsStruct = {
+    'id' : 'number',
     'post_id' : 'number',
     'text' : 'string',
-    'date' : 'string'
+    'date' : 'string',
+    'last_edit' : 'string'
 }
 
 function containsValidInput(table, params) {
@@ -79,13 +82,13 @@ function containsValidInput(table, params) {
 }
 
 function createInsertStatmentBasedOnTableName(table, params) {
-    let sql = `REPLACE INTO ${table}`;
+    let sql = `REPLACE INTO ${table} `;
 
     switch (table) {
         case `posts`:
             let now = Date.now();
-            sql += `(title, text, category_id, author_id, date) VALUES ('${params.title}', '${params.text}',
-            '${params.categoryId}', '${params.authorId}', '${now}');`;
+            sql += `(title, text, category_id, author_id, views, date) VALUES ('${params.title}', '${params.text}',
+            '${params.categoryId}', '${params.authorId}', '0', '${now}');`;
             break;
         case `categories`:
             sql += `(title) VALUES('${params.title}');`;
@@ -94,6 +97,10 @@ function createInsertStatmentBasedOnTableName(table, params) {
             let now = Date.now();
             sql += `(first_name, last_name, password, email, signup_date, login_date)
             VALUES ('${params.firstName}', '${params.lastName}', '${params.password}', '${params.email}', '${now}', '0');`;
+            break;
+        case 'comments':
+            let now = Date.now();
+            sql += `(post_id, text, date) VALUES ('${params.postId}', '${params.text}', '${now}');`:
             break;
     }
     return sql;
@@ -120,6 +127,10 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             ('signupDate' in params ? `signup_date = '${params.signupDate}', ` : '') +
             ('loginDate' in params ? `login_date = '${params.loginDate}' ` : '');
             break;
+        case 'comments':
+            let now = Date.now();
+            sqlSet += ('text' in params ? `text = ${params.text}, date = ${now}, `;
+            break; 
     }
     
     if (sqlSet.endsWith(`, `)) {
@@ -193,8 +204,26 @@ const model = {
                 console.log(`${table}: Completed SELECT operation!`);
             }
         });
+        
+        if (table == 'posts') {
+            db.run(`UPDATE posts SET views = views + 1 WHERE id = '${next.request.params.id}'`,
+            err => {
+                if (err) {
+                    console.err("There was an error incrementing views!");
+                    console.err(err.message);
+                }
+            });
+        }
     },
     insertData: (table, next) => {
+        if (table == 'comments') {
+            if (!('postId' in next.request.body) ||
+                !('text' in next.request.body)) {
+                next.handleRequest(next.request, next.respond, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                return;
+            }
+        }
+
         if (table == 'users') {
             if (!('email' in next.request.body) ||
                 !('password' in next.request.body) ||
@@ -223,6 +252,7 @@ const model = {
             'reason':'input compliance fallthrough'}, null);
             return;
         }
+
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body);
         db.run(sql, (err) => {
             if (err != null) {
