@@ -35,10 +35,13 @@ const controller = {
     },
     handleRequest: (req, res, data, next) => {
         res.json(data != undefined ? data : {});
+        console.log(req.sessionID);
+        console.log(req.session.userId);
+        console.log(req.cookies);
     },
-    handleLogin: (req, res, data, next) => {
-        model.userLogin(req, res, 
-            controller.handleRequest);
+    handleLogin: (req, res, next) => {
+        console.log("LOGGING IN!");
+        model.userLogin(req, res, controller.handleRequest);
     },
     handleLogout: (req, res, data, next) => {
         res.cookie.clearCookie('sessionId', { path: '/api' });
