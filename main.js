@@ -8,6 +8,7 @@ const postsRouter = require('./router/posts.js');
 const categoriesRouter = require('./router/categories.js');
 const usersRouter = require('./router/users.js');
 const userRouter = require('./router/user.js');
+const commentsRouter = require('./router/comments.js');
 const app = new express();
 
 // INDEX METHODS' ROUTES
@@ -48,5 +49,8 @@ app.use('/api/categories', categoriesRouter);
 
 // USERS METHODS' ROUTES
 app.use('/api/users', usersRouter);
+
+// COMMENTS METHODS' ROUTES
+app.use('/api/comments', commentsRouter);
 
 app.listen(80);
