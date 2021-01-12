@@ -357,6 +357,7 @@ const model = {
         });
     },
     userLogin: (req, res, next) => { 
+        // ToDo add new login date on successful login
         if ((!('email' in req.body) && !('password' in req.body)) || 
             (req.body.email.length < 3 || req.body.password.length < 3)) {
             next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
