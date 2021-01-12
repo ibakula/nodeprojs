@@ -20,7 +20,7 @@ const postsStruct = {
     'text' : 'string',
     'categoryId' : 'number',
     'authorId' : 'number',
-    'views' : 'number'
+    'views' : 'number',
     'date' : 'string'
 };
 
