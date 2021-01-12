@@ -104,7 +104,7 @@ function createInsertStatmentBasedOnTableName(table, params) {
             break;
         case 'comments':
             let now = Date.now();
-            sql += `(post_id, user_id, text, date, last_edit) VALUES ('${params.postId}', '${params.userId}', '${params.text}', '${now}', '0');`:
+            sql += `(post_id, user_id, text, date, last_edit) VALUES ('${params.postId}', '${params.userId}', '${params.text}', '${now}', '0');`;
             break;
     }
     return sql;
@@ -133,7 +133,7 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             break;
         case 'comments':
             let now = Date.now();
-            sqlSet += ('text' in params ? `text = ${params.text}, last_edit = ${now}, `;
+            sqlSet += ('text' in params ? `text = ${params.text}, last_edit = ${now}, ` : '');
             break; 
     }
     
