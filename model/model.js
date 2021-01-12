@@ -32,6 +32,7 @@ const categoriesStruct = {
 const commentsStruct = {
     'id' : 'number',
     'post_id' : 'number',
+    'user_id' : 'number',
     'text' : 'string',
     'date' : 'string',
     'last_edit' : 'string'
@@ -49,6 +50,9 @@ function containsValidInput(table, params) {
             break;
         case `categories`:
             struct = categoriesStruct;
+            break;
+        case 'comments':
+            struct = commentsStruct;
             break;
     }
     
@@ -100,7 +104,7 @@ function createInsertStatmentBasedOnTableName(table, params) {
             break;
         case 'comments':
             let now = Date.now();
-            sql += `(post_id, text, date) VALUES ('${params.postId}', '${params.text}', '${now}');`:
+            sql += `(post_id, user_id, text, date, last_edit) VALUES ('${params.postId}', '${params.userId}', '${params.text}', '${now}', '0');`:
             break;
     }
     return sql;
@@ -129,7 +133,7 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             break;
         case 'comments':
             let now = Date.now();
-            sqlSet += ('text' in params ? `text = ${params.text}, date = ${now}, `;
+            sqlSet += ('text' in params ? `text = ${params.text}, last_edit = ${now}, `;
             break; 
     }
     
@@ -162,6 +166,10 @@ function hasPermissions(table, method, userId, params) {
             reqPermission = 1;
         case 'comments':
             // ToDo: Allow user to delete/update own commentaries
+            if (userId != false &&
+                isCommentAuthor(params.id, userId)) {
+                return true;
+            }
             break;
     }
 
@@ -184,8 +192,25 @@ function hasPermissions(table, method, userId, params) {
     return false;
 }
 
+function isCommentAuthor(commentId, userId) {
+    let result = false;
+    db.get(`SELECT id FROM comments WHERE id = '${commentId}' AND user_id = '${userId};`, (err, row) => {
+        if (err) {
+            console.error("DB Error checking comment.");
+            console.error(err.message);
+        }
+        else {
+            if (row != undefined) {
+                result = true;
+            }
+        }
+    });
+    return result;
+}
+
 const model = {
     selectData: (table, next) => {
+        // ToDo: make users table only select specific columns
         // Validity check, prevent execution of a query if false    
         if (!containsValidInput(table, next.request.params)) {
             next.handleRequest(next.request, next.respond, {'result':'Failed!', 
@@ -217,24 +242,33 @@ const model = {
     },
     insertData: (table, next) => {
         if (table == 'comments') {
-            if (!('postId' in next.request.body) ||
-                !('text' in next.request.body)) {
-                next.handleRequest(next.request, next.respond, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+            if (!('postId' in next.request.body &&
+                'text' in next.request.body) &&
+                'userId' in next.request.session &&
+                !('userId' in next.request.body)) {
+                next.handleRequest(next.request, next.respond, 
+                {'result': 'Failed!', 'reason':'Invalid input or session!'}, 
+                null);
                 return;
             }
+            next.request.body.userId = next.request.session.userId;
         }
 
         if (table == 'users') {
-            if (!('email' in next.request.body) ||
-                !('password' in next.request.body) ||
-                !('firstName' in next.request.body) ||
-                !('lastName' in next.request.body)) {
-                next.handleRequest(next.request, next.respond, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+            if (!('email' in next.request.body &&
+                'password' in next.request.body &&
+                'firstName' in next.request.body &&
+                'lastName' in next.request.body)) {
+                next.handleRequest(next.request, next.respond, 
+                {'result': 'Failed!', 'reason':'Invalid input!'}, 
+                null);
                 return;
             }
             for (let i of req.body) {
                 if (req.body[i].length < 3) {
-                    next.handleRequest(next.request, next.respond, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
+                    next.handleRequest(next.request, next.respond, 
+                    {'result': 'Failed!', 'reason':'Invalid input!'}, 
+                    null);
                     return;
                 }
             }
@@ -268,12 +302,6 @@ const model = {
         });
     },
     removeData: (table, next) => {
-        if (('id' in next.request.body)) {
-            next.handleRequest(next.request, next.respond, 
-            {'result':'Failed!', 'reason':'cannot include id in post method'}, 
-            null);
-            return;
-        }
         if (!hasPermissions(table, 'REMOVE',
            ('userId' in next.request.session ? next.request.session.userId : false),
             next.request.params)) {
@@ -301,12 +329,6 @@ const model = {
         });
     },
     updateData: (table, next) => {
-        if (('id' in next.request.body)) {
-            next.handleRequest(next.request, next.respond, 
-            {'result':'Failed!', 'reason':'cannot include id in post method'}, 
-            null);
-            return;
-        }
         if (!hasPermissions(table, 'UPDATE',
            ('userId' in next.request.session ? next.request.session.userId : false),
             next.request.params)) {
