@@ -145,67 +145,50 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
 }
 
 // Intended usage on insert, update and remove methods
-function hasPermissions(table, method, userId, params) {
+function hasPermissions(table, method, session, params, callback = null) {
     let reqPermission = 3;
     switch (table) {
         case 'posts':
             reqPermission = 1;
             break;
         case 'users':
-            if ((userId == false && 
+            if ((session == false && 
                 method == 'INSERT') || 
-                (params.id == userId && 
+                (params.id == session.userId && 
                 method == 'UPDATE')) {
                 return true;
             }
             break;
         case 'categories':
             reqPermission = 1;
+            break;
         case 'comments':
-            // ToDo: Allow user to delete/update own commentaries
-            if (userId != false &&
-                 method == 'INSERT' ||
-                ((method == 'UPDATE' || 
-                 method == 'REMOVE') &&
-                isCommentAuthor(params.id, userId))) {
+            if (session != false) {
                 return true;
             }
             break;
     }
 
-    if (userId == false) {
+    if (session == false) {
         return false;
     }
 
-    db.get(`SELECT permissions FROM users WHERE id = ${userId};`,
-    (err, row) => {
-        if (err != null ||
-            row == undefined) {
-            return false;
-        }
-        else {
-            if (row['permissions'] >= reqPermission) {
-                return true;
-            }
-        }
-    });
-    return false;
+    return session.permissions >= reqPermission;
 }
 
-function isCommentAuthor(commentId, userId) {
-    let result = false;
-    db.get(`SELECT id FROM comments WHERE id = '${commentId}' AND user_id = '${userId};`, (err, row) => {
+function handleCheckCommentAuthor(commentId, userId, permission, callback) {
+    db.get(`SELECT user_id FROM comments WHERE id = '${commentId}';`, (err, row) => {
         if (err) {
             console.error("DB Error checking comment.");
             console.error(err.message);
         }
         else {
-            if (row != undefined) {
-                result = true;
+            if (row && (row['user_id'] == userId ||
+                permission >= 3)) {
+                callback(commentId);
             }
         }
     });
-    return result;
 }
 
 const model = {
@@ -253,7 +236,7 @@ const model = {
             }
             next.request.body.userId = next.request.session.userId;
         }
-
+        
         if (table == 'users') {
             if (!('email' in next.request.body &&
                 'password' in next.request.body &&
@@ -273,8 +256,8 @@ const model = {
                 }
             }
         }
-
-        if (!hasPermissions(table, 'INSERT', ('userId' in next.request.session ? next.request.session.userId : false), next.request.body)) {
+        
+        if (!hasPermissions(table, 'INSERT', ('userId' in next.request.session ? next.request.session : false), next.request.body)) {
             next.handleRequest(next.request, next.respond, 
             {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
             null);
@@ -301,21 +284,43 @@ const model = {
             }
         });
     },
+    removeCommentHelperCallbackFn(commentId) {
+        db.run(`DELETE FROM comments WHERE id = '${commentId}';`, (err) => {
+            if (err != null) {
+                console.error(`comments: Could not complete DELETE operation!`);
+                console.error(err.message);
+            }
+            else {
+                 console.log(`comments: Completed DELETE operation!`);
+            }
+        });
+    },
     removeData: (table, next) => {
         if (!hasPermissions(table, 'REMOVE',
-           ('userId' in next.request.session ? next.request.session.userId : false),
+            ('userId' in next.request.session ? next.request.session : false),
             next.request.params)) {
             next.handleRequest(next.request, next.respond, 
             {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
             null);
             return;
         }
+        
         // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.params)) {
             next.handleRequest(next.request, next.respond,
             {'result':'Failed!', 'reason':'input compliance fallthrough'}, null);
             return;
         }
+        
+        if (table == 'comments') {
+            handleCheckCommentAuthor(next.request.params.id, 
+            next.request.session.userId,
+            next.request.session.permissions,
+            model.removeCommentHelperCallbackFn);
+            next.handleRequest(next.request, next.respond, { result: `Success!` }, null);
+            return;
+        }
+        
         db.run(`DELETE FROM ${table} WHERE id = ${next.request.params.id};`, (err) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, { result: `Failure!` }, null);
@@ -330,7 +335,7 @@ const model = {
     },
     updateData: (table, next) => {
         if (!hasPermissions(table, 'UPDATE',
-           ('userId' in next.request.session ? next.request.session.userId : false),
+           ('userId' in next.request.session ? next.request.session : false),
             next.request.params)) {
             next.handleRequest(next.request, next.respond, {'result':'Failure!',
              'reason':'You do not have the required permissions!'}, null);
@@ -370,7 +375,7 @@ const model = {
              null);
             return;
         }
-        db.get(`SELECT id, password FROM users WHERE email = '${req.body.email}'`, (err, row) => {
+        db.get(`SELECT id, password, permissions FROM users WHERE email = '${req.body.email}'`, (err, row) => {
             if (err) {
                 console.error("An DB error has occured executing userLogin");
                 console.error(err.message);
@@ -382,6 +387,7 @@ const model = {
                 }
                 else {
                     req.session.userId = row['id'];
+                    req.session.permissions = row['permissions'];
                     req.session.save(err => {
                         if (err) {
                             console.error("Couldnt save session on userLogin!");
