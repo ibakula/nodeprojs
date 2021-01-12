@@ -87,10 +87,10 @@ function containsValidInput(table, params) {
 
 function createInsertStatmentBasedOnTableName(table, params) {
     let sql = `REPLACE INTO ${table} `;
+    let now = Date.now();
 
     switch (table) {
         case `posts`:
-            let now = Date.now();
             sql += `(title, text, category_id, author_id, views, date) VALUES ('${params.title}', '${params.text}',
             '${params.categoryId}', '${params.authorId}', '0', '${now}');`;
             break;
@@ -98,12 +98,10 @@ function createInsertStatmentBasedOnTableName(table, params) {
             sql += `(title) VALUES('${params.title}');`;
             break;
         case `users`:
-            let now = Date.now();
             sql += `(first_name, last_name, password, email, signup_date, login_date)
             VALUES ('${params.firstName}', '${params.lastName}', '${params.password}', '${params.email}', '${now}', '0');`;
             break;
         case 'comments':
-            let now = Date.now();
             sql += `(post_id, user_id, text, date, last_edit) VALUES ('${params.postId}', '${params.userId}', '${params.text}', '${now}', '0');`;
             break;
     }
@@ -132,7 +130,6 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             ('loginDate' in params ? `login_date = '${params.loginDate}' ` : '');
             break;
         case 'comments':
-            let now = Date.now();
             sqlSet += ('text' in params ? `text = ${params.text}, last_edit = ${now}, ` : '');
             break; 
     }
@@ -167,7 +164,10 @@ function hasPermissions(table, method, userId, params) {
         case 'comments':
             // ToDo: Allow user to delete/update own commentaries
             if (userId != false &&
-                isCommentAuthor(params.id, userId)) {
+                 method == 'INSERT' ||
+                ((method == 'UPDATE' || 
+                 method == 'REMOVE') &&
+                isCommentAuthor(params.id, userId))) {
                 return true;
             }
             break;
