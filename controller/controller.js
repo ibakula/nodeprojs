@@ -1,6 +1,14 @@
 const model = require('../model/model.js');
 
 const controller = {
+    getLastPostId: (req, res, next) => {
+        next = {
+            handleRequest: controller.handleRequest,
+            request: req,
+            respond: res
+        }
+        model.selectDataEnd(next);
+    },
     getData: (req, res, route_name, next) => {
         next = {
             handleRequest: controller.handleRequest,

@@ -183,7 +183,7 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
             console.error(err.message);
         }
         else {
-            if (row && (row['user_id'] == userId ||
+            if (row && 'user_id' in row && (row['user_id'] == userId ||
                 permission >= 3)) {
                 callback(commentId);
             }
@@ -192,6 +192,26 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
 }
 
 const model = {
+    selectDataEnd: (next) => {
+        db.get("SELECT id FROM posts DESC LIMIT 1;", (err, row) => {
+            if (err) {
+                console.error("DB Error couldnt fetch post from end!");
+                console.error(err.message);
+                next.handleRequest(next.request, next.respond,
+                {'result':'Failed!'}, null);
+            }
+            else {
+                if (row  && 'id' in row) {
+                    next.handleRequest(next.request, next.respond,
+                    row, null);
+                }
+                else {
+                    next.handleRequest(next.request, next.respond,
+                    {'result':'Failed!'}, null);
+                }
+            }
+        });
+    },
     selectData: (table, next) => {
         // ToDo: make users table only select specific columns
         // Validity check, prevent execution of a query if false    
