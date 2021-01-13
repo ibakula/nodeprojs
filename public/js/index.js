@@ -1,6 +1,8 @@
 // Styling for article children
-const mainTag = document.querySelector("main");
-const asideTag = document.querySelector("aside");
+const articlesSection = {
+  'main' : document.querySelector("main"),
+  'aside' : document.querySelector("aside")
+};
 const lastLoadedPost = {
   'main' : -1,
   'aside' : -1
@@ -55,9 +57,10 @@ function splitData(data) {
 function createNewArticle(type = 'main', data) {
   let article = document.createElement("article");
   let skimmed = splitData(data.text); // { img: tag, text: text }
-  let date = new Date(parseInt(data.date));
+
   switch (type) {
     case 'main':
+      let date = new Date(parseInt(data.date));
       article.appendChild(document.createElement("div"));
       article.lastElementChild.className = "col-sm-auto";
       article.lastElementChild.innerHTML = skimmed.img;
@@ -76,6 +79,14 @@ function createNewArticle(type = 'main', data) {
       article.lastElementChild.lastElementChild.innerText = skimmed.text;
       break;
     case 'aside':
+      article.innerHTML = skimmed.img;
+      article.appendChild(document.createElement("a"));
+      article.lastElementChild.setAttribute("href", "article.html");
+      article.lastElementChild.appendChild(document.createElement("h3"));
+      article.lastElementChild.lastElementChild.innerText = data.title;
+      article.appendChild(document.createElement("p"));
+      article.lastElementChild.className = "lead";
+      article.lastElementChild.innerText = skimmed.text;
       break;
   }
   return article;
@@ -87,8 +98,10 @@ function loadArticle(response, type) {
     //clearContent(mainTag);
     //clearContent(asideTag);
     let article = createNewArticle(type, response.data);
-    article.className = "row overflow-hidden lead";
-    mainTag.appendChild(article);
+    if (type == 'main') {
+      article.className = "row overflow-hidden lead";
+    }
+    articlesSection[type].appendChild(article);
   }
 }
 
@@ -100,9 +113,6 @@ function onLoadLastArticleById(response, type) {
            lastLoadedPost[type] > 0;
             --lastLoadedPost[type], ++loadedCount) {
 
-        if (loadedCount >= loadArticlesConf[type] || (lastLoadedPost[type]-1) >= 0) {
-          setTimeout(() => { mainTag.firstElementChild.remove(); }, (4000 * (loadedCount+1))); // Clear loading screen
-        }
         if (loadedCount >= loadArticlesConf[type]) {
           break;
         }
@@ -113,6 +123,14 @@ function onLoadLastArticleById(response, type) {
           setTimeout(() => { loadArticle(response, type) },
           (2000 * (loadedCount+1))); });
       }
+      setTimeout(() => { 
+          if (type == 'main') {
+            articlesSection[type].firstElementChild.remove();
+          }
+          else if (type == 'aside') {
+            articlesSection[type].children[1].remove();
+          }
+        }, (4000*loadArticlesConf[type]));;
     }
   }
 }
@@ -135,6 +153,9 @@ function main() {
   axios.get('/api/posts/last')
     .catch(handleGetError)
     .then((response) => { onLoadLastArticleById(response, 'main'); });
+  axios.get('/api/posts/last')
+    .catch(handleGetError)
+    .then((response) => { onLoadLastArticleById(response, 'aside'); });
 }
 
 main();
