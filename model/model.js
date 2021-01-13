@@ -206,8 +206,7 @@ const model = {
                     row, null);
                 }
                 else {
-                    next.handleRequest(next.request, next.respond,
-                    {'result':'Failed!'}, null);
+                    next.handleRequest(next.request, next.respond, undefined, null);
                 }
             }
         });
@@ -254,7 +253,7 @@ const model = {
                 null);
                 return;
             }
-            next.request.body.userId = next.request.session.userId;
+            next.request.body.authorId = next.request.session.userId;
         }
         
         if (table == 'users') {
@@ -383,7 +382,7 @@ const model = {
     },
     userLogin: (req, res, next) => { 
         // ToDo add new login date on successful login
-        if ((!('email' in req.body) && !('password' in req.body)) || 
+        if ((!('email' in req.body) || !('password' in req.body)) || 
             (req.body.email.length < 3 || req.body.password.length < 3)) {
             next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
             return;
