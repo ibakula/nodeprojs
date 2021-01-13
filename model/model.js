@@ -395,7 +395,7 @@ const model = {
              null);
             return;
         }
-        db.get(`SELECT id, first_name, last_name, password, permissions, last_login FROM users WHERE email = '${req.body.email}'`, (err, row) => {
+        db.get(`SELECT id, first_name, last_name, password, permissions, login_date FROM users WHERE email = '${req.body.email}'`, (err, row) => {
             if (err) {
                 console.error("An DB error has occured executing userLogin");
                 console.error(err.message);
@@ -411,7 +411,7 @@ const model = {
                     req.session.email = req.body.email;
                     req.session.firstName = row['first_name']
                     req.session.lastName = row['last_name'];
-                    req.session.lastLogin = row['last_login'];
+                    req.session.lastLogin = row['login_date'];
                     req.session.save(err => {
                         if (err) {
                             console.error("Couldnt save session on userLogin!");
@@ -427,6 +427,7 @@ const model = {
         if (req.session && 'userId' in req.session) {
             let userData = { 
                 userId: req.session.userId, 
+                permissions: req.session.permissions,
                 firstName: req.session.firstName, 
                 lastName: req.session.lastName, 
                 email: req.session.email,
