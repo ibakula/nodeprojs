@@ -57,6 +57,9 @@ const controller = {
         });
 
         controller.handleRequest(req, res, { 'result' : 'Success!' }, next);
+    },
+    handleStatusRequest: (req, res, next) => {
+        model.getUserStatus(req, res, controller.handleRequest);
     }
 };
 

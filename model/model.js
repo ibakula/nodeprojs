@@ -31,11 +31,11 @@ const categoriesStruct = {
 
 const commentsStruct = {
     'id' : 'number',
-    'post_id' : 'number',
-    'user_id' : 'number',
+    'postId' : 'number',
+    'userId' : 'number',
     'text' : 'string',
     'date' : 'string',
-    'last_edit' : 'string'
+    'lastEdit' : 'string'
 }
 
 function containsValidInput(table, params) {
@@ -395,7 +395,7 @@ const model = {
              null);
             return;
         }
-        db.get(`SELECT id, password, permissions FROM users WHERE email = '${req.body.email}'`, (err, row) => {
+        db.get(`SELECT id, first_name, last_name, password, permissions, last_login FROM users WHERE email = '${req.body.email}'`, (err, row) => {
             if (err) {
                 console.error("An DB error has occured executing userLogin");
                 console.error(err.message);
@@ -408,6 +408,10 @@ const model = {
                 else {
                     req.session.userId = row['id'];
                     req.session.permissions = row['permissions'];
+                    req.session.email = req.body.email;
+                    req.session.firstName = row['first_name']
+                    req.session.lastName = row['last_name'];
+                    req.session.lastLogin = row['last_login'];
                     req.session.save(err => {
                         if (err) {
                             console.error("Couldnt save session on userLogin!");
@@ -418,6 +422,21 @@ const model = {
             }
             next(req, res, {'result' : 'Success!'}, null);
         });
+    },
+    getUserStatus: (req, res, next) => {
+        if (req.session && 'userId' in req.session) {
+            let userData = { 
+                userId: req.session.userId, 
+                firstName: req.session.firstName, 
+                lastName: req.session.lastName, 
+                email: req.session.email,
+                lastLogin: req.session.lastLogin
+             };
+             next(req, res, userData, null);
+        }
+        else {
+           next(req, res, undefined, null);
+        }
     }
 };
 
