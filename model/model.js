@@ -266,13 +266,11 @@ const model = {
                 null);
                 return;
             }
-            for (let i of req.body) {
-                if (req.body[i].length < 3) {
-                    next.handleRequest(next.request, next.respond, 
-                    {'result': 'Failed!', 'reason':'Invalid input!'}, 
-                    null);
-                    return;
-                }
+            if (next.request.body['email'].length < 5 || next.request.body['password'] < 3) {
+                next.handleRequest(next.request, next.respond, 
+                {'result': 'Failed!', 'reason':'Invalid input!'}, 
+                null);
+                return;
             }
         }
         
