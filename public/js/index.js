@@ -152,9 +152,19 @@ function loadUserUI() {
 }
 
 function handleLoadUserData(response) {
-  if (response.data && 'id' in response.data) {
-    userData = response.data;
+  if (response.data && 'userId' in response.data) {
+    for (let i in response.data) {
+      localStorage.setItem(i, response.data[i]);
+    }
     loadUserUI();
+  }
+  else {
+    localStorage.removeItem('userId');
+    localStorage.removeItem('permissions');
+    localStorage.removeItem('email');
+    localStorage.removeItem('firstName');
+    localStorage.removeItem('lastName');
+    localStorage.removeItem('lastLogin');
   }
 }
 

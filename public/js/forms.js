@@ -1,4 +1,4 @@
-var formsList = new Array();
+6var formsList = new Array();
 
 for (var i = 0; i < document.forms.length; ++i) {
     if (document.forms.item(i) != null) {
@@ -80,6 +80,14 @@ function handleFormSubmit(e, formName, formIndex) {
   }
 }
 
+function handleLoadUserData(response) {
+  if (response.data && 'userId' in response.data) {
+    for (let i in response.data) {
+      localStorage.setItem(i, response.data[i]);
+    }
+  }
+}
+
 function postOutput(response, formName, formIndex) {
   if (response.data && 'result' in response.data) {
     //var input = null;
@@ -107,17 +115,19 @@ function postOutput(response, formName, formIndex) {
       //input = fuseChildrenValuesToArray(formsList[formIndex].children);
     }
     
-    if (output_div != null && input != null && response.data['result'] == 'Success!') {
+    if (output_div != null /*&& input != null*/ && response.data['result'] == 'Success!') {
       var merged = "<p class=\"lead text-center\">Success! Redirecting..";
       /*input.forEach(function(currentValue) {
           merged += currentValue + "<br>";
       });*/
       output_div.innerHTML += merged + "</p>";
       output_div.className = "alert alert-success p-4 mt-3";
+      axios.get('/api/user/status', handleLoadUserData);
+      setTimeout(() => { window.location.href = "/index.html"; }, 4000);
     }
     else {
       output_div.className = "alert alert-danger p-4 mt-3";
-      output_div.innerHTML = "<p>Error: Something seems to went wrong with the input.</p>"
+      output_div.innerHTML = "<p>Error: Something seems to went wrong with the input.</p>";
     }
   }
   else {
