@@ -13,6 +13,7 @@ const loadArticlesConf = {
   'main' : 5,
   'aside' : 3
 };
+let userData = null;
 
 function clearContent(tag) {
   for (let element of tag.children) {
@@ -92,12 +93,12 @@ function createNewArticle(type = 'main', data) {
   return article;
 }
 
-function loadArticle(response, type) {
-  if (response.data && 'text' in response.data) {
+function loadArticle(data, type) {
+  if (data && 'text' in data) {
     // Old content flush
     //clearContent(mainTag);
     //clearContent(asideTag);
-    let article = createNewArticle(type, response.data);
+    let article = createNewArticle(type, data);
     if (type == 'main') {
       article.className = "row overflow-hidden lead";
     }
@@ -105,7 +106,18 @@ function loadArticle(response, type) {
   }
 }
 
-function onLoadLastArticleById(response, type) {
+function handleLoadPopularArticles(response, type) {
+  if (response.data && Array.isArray(response.data)) {
+    for (let i = 0; i < response.data.length; ++i) {
+      setTimeout(() => { loadArticle(response.data[i], type); }, (2000*(i+1)));
+    }
+  }
+  setTimeout(() => {
+      articlesSection[type].children[1].remove();
+  }, (4000*loadArticlesConf[type]));
+}
+
+function handleLoadArticlesFromEnd(response, type) {
   if (response.data && 'id' in response.data && response.data.id > 0) {
     lastLoadedPost[type] = response.data.id;
     if (lastLoadedPost[type] > 0) {
@@ -120,7 +132,7 @@ function onLoadLastArticleById(response, type) {
         .catch(handleGetError)
         // Added timeout to give animation "perception"
         .then((response) => { 
-          setTimeout(() => { loadArticle(response, type) },
+          setTimeout(() => { loadArticle(response.data, type) },
           (2000 * (loadedCount+1))); });
       }
       setTimeout(() => { 
@@ -130,8 +142,19 @@ function onLoadLastArticleById(response, type) {
           else if (type == 'aside') {
             articlesSection[type].children[1].remove();
           }
-        }, (4000*loadArticlesConf[type]));;
+        }, (4000*loadArticlesConf[type]));
     }
+  }
+}
+
+function loadUserUI() {
+  document.getElementById("top").firstElementChild.firstElementChild.children[1].remove();
+}
+
+function handleLoadUserData(response) {
+  if (response.data && 'id' in response.data) {
+    userData = response.data;
+    loadUserUI();
   }
 }
 
@@ -150,12 +173,15 @@ function handleGetError(err) {
 }
 
 function main() {
+  axios.get('/api/user/status')
+    .catch(handleGetError)
+    .then(handleLoadUserData);
   axios.get('/api/posts/last')
     .catch(handleGetError)
-    .then((response) => { onLoadLastArticleById(response, 'main'); });
-  axios.get('/api/posts/last')
+    .then((response) => { handleLoadArticlesFromEnd(response, 'main'); });
+  axios.get('/api/posts/popular')
     .catch(handleGetError)
-    .then((response) => { onLoadLastArticleById(response, 'aside'); });
+    .then((response) => { handleLoadPopularArticles(response, 'aside'); });
 }
 
 main();

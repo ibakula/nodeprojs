@@ -49,8 +49,12 @@
             <h3 class="display-5">Registration form</h3>
             <form class="ml-4" id="register_form">
                 <div class="form-group">
-                    <label for="register_user" class="lead">Username</label>
-                    <input type="text" class="form-control form-control-md" id="register_user" required />
+                    <label for="register_fname" class="lead">First name</label>
+                    <input type="text" class="form-control form-control-md" id="register_fname" required />
+                </div>
+                <div class="form-group">
+                    <label for="register_lname" class="lead">Last name</label>
+                    <input type="text" class="form-control form-control-md" id="register_lname" required />
                 </div>
                 <div class="form-group">
                     <label for="register_password" class="lead">Password</label>
@@ -100,6 +104,7 @@
     </section>
 
     <footer class="bg-light"><a href="#top">Go to top!</a></footer>
+    <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
 </div>
 </body>
 </html>

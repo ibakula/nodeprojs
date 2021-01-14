@@ -47,46 +47,82 @@ function _helperFuncUpdateOutputElement(outputName) {
     return output_div;
 }
 
+function handleResponse(err) {
+  if (err.response) {
+          
+  }
+  else if (err.request) {
+          
+  }
+  else {
+          
+  }
+}
+
 function handleFormSubmit(e, formName, formIndex) {
-    e.preventDefault();
+  e.preventDefault();
+  const params = new URLSearchParams();
+  switch(formName) {
+    case 'register_form':
+      params.append("firstName", formsList[formIndex].querySelector("#register_fname").value);
+      params.append("lastName", formsList[formIndex].querySelector("#register_lname").value);
+      params.append("password", formsList[formIndex].querySelector("#register_password").value);
+      params.append("email", formsList[formIndex].querySelector("#register_email").value);
+      axios.post('/api/users', params).catch(handleResponse).then((response) => { postOutput(response, formName, formIndex); }).catch(handleResponse);
+      break;
+    case 'login_form':
+      params.append("email", formsList[formIndex].querySelector("#email").value);
+      params.append("password", formsList[formIndex].querySelector("#password").value);
+      axios.post('api/user/login', params).catch(handleResponse).then((response) => { postOutput(response, formName, formIndex); });
+      break;
+    case 'commentary_form':
+      break;
+  }
+}
+
+function postOutput(response, formName, formIndex) {
+  if (response.data && 'result' in response.data) {
     var input = null;
     var output_div = null;
-    var output_name = new String();
-    
+    var output_name = "";
+
     switch(formName) {
-        case "subscription_form":
-            output_name = "subscription_output";
-            break;
-        case "register_form":
-            output_name = "register_output";
-            break;
-        case "login_form":
-            output_name = "login_output";
-            break;
-        case "commentary_form":
-            output_name = "commentary_output";
-            break;
+      case "subscription_form":
+        output_name = "subscription_output";
+        break;
+      case "register_form":
+        output_name = "register_output";
+        break;
+      case "login_form":
+        output_name = "login_output";
+        break;
+      case "commentary_form":
+        output_name = "commentary_output";
+        break;
     }
     
-    if (output_name != "") {
-        output_div = _helperFuncUpdateOutputElement(output_name);
-        formsList[formIndex].parentElement.appendChild(output_div);
-        input = fuseChildrenValuesToArray(formsList[formIndex].children);
+   if (output_name != "") {
+      output_div = _helperFuncUpdateOutputElement(output_name);
+      formsList[formIndex].parentElement.appendChild(output_div);
+      input = fuseChildrenValuesToArray(formsList[formIndex].children);
     }
     
-    if (output_div != null) {
-        if (input != null) {
-            var merged = "<p class=\"lead text-center\">";
-            input.forEach(function(currentValue) {
-                merged += currentValue + "<br>";
-                console.log(currentValue);
-            });
-            output_div.innerHTML += merged + "</p>";
-            output_div.className = "alert alert-success p-4 mt-3";
-        }
-        else {
-            output_div.className = "alert alert-danger p-4 mt-3";
-            output_div.innerHTML = "<p>Error: Something seems to went wrong with the input.</p>"
-        }
+    if (output_div != null && input != null && response.data['result'] == 'Success!') {
+      var merged = "<p class=\"lead text-center\">";
+      input.forEach(function(currentValue) {
+          merged += currentValue + "<br>";
+          console.log(currentValue);
+      });
+      output_div.innerHTML += merged + "</p>";
+      output_div.className = "alert alert-success p-4 mt-3";
     }
+    else {
+      output_div.className = "alert alert-danger p-4 mt-3";
+      output_div.innerHTML = "<p>Error: Something seems to went wrong with the input.</p>"
+    }
+  }
+  else {
+    output_div.className = "alert alert-danger p-4 mt-3";
+    output_div.innerHTML = "<p>Error: Something seems to went wrong with the input.</p>";
+  }
 }
