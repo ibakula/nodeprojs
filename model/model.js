@@ -380,6 +380,10 @@ const model = {
     },
     userLogin: (req, res, next) => { 
         // ToDo add new login date on successful login
+        if (req.session && 'userId' in req.session) {
+            next(req, res, {'result': 'Failed!', 'reason':'Log out first!'}, null);
+            return;
+        }
         if ((!('email' in req.body) || !('password' in req.body)) || 
             (req.body.email.length < 3 || req.body.password.length < 3)) {
             next(req, res, {'result': 'Failed!', 'reason':'Invalid input!'}, null);
