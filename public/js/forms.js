@@ -82,7 +82,7 @@ function handleFormSubmit(e, formName, formIndex) {
 
 function postOutput(response, formName, formIndex) {
   if (response.data && 'result' in response.data) {
-    var input = null;
+    //var input = null;
     var output_div = null;
     var output_name = "";
 
@@ -104,15 +104,14 @@ function postOutput(response, formName, formIndex) {
    if (output_name != "") {
       output_div = _helperFuncUpdateOutputElement(output_name);
       formsList[formIndex].parentElement.appendChild(output_div);
-      input = fuseChildrenValuesToArray(formsList[formIndex].children);
+      //input = fuseChildrenValuesToArray(formsList[formIndex].children);
     }
     
     if (output_div != null && input != null && response.data['result'] == 'Success!') {
-      var merged = "<p class=\"lead text-center\">";
-      input.forEach(function(currentValue) {
+      var merged = "<p class=\"lead text-center\">Success! Redirecting..";
+      /*input.forEach(function(currentValue) {
           merged += currentValue + "<br>";
-          console.log(currentValue);
-      });
+      });*/
       output_div.innerHTML += merged + "</p>";
       output_div.className = "alert alert-success p-4 mt-3";
     }
