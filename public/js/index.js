@@ -149,6 +149,7 @@ function handleLoadArticlesFromEnd(response, type) {
 
 function loadUserUI() {
   document.getElementById("top").firstElementChild.firstElementChild.children[1].remove();
+  document.getElementById("top").firstElementChild.firstElementChild.lastElementChild.className = "col-sm";
 }
 
 function handleLoadUserData(response) {
