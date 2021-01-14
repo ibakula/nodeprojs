@@ -73,7 +73,7 @@ function handleFormSubmit(e, formName, formIndex) {
     case 'login_form':
       params.append("email", formsList[formIndex].querySelector("#email").value);
       params.append("password", formsList[formIndex].querySelector("#password").value);
-      axios.post('api/user/login', params).catch(handleResponse).then((response) => { postOutput(response, formName, formIndex); });
+      axios.post('api/user/login', params).catch(handleResponse).then((response) => { postOutput(response, formName, formIndex); }).catch(handleResponse);
       break;
     case 'commentary_form':
       break;
