@@ -86,7 +86,7 @@ function containsValidInput(table, params) {
 }
 
 function createInsertStatmentBasedOnTableName(table, params) {
-    let sql = `REPLACE INTO ${table} `;
+    let sql = `INSERT INTO ${table} `;
     let now = Date.now();
 
     switch (table) {
