@@ -60,6 +60,9 @@ const controller = {
     },
     handleStatusRequest: (req, res, next) => {
         model.getUserStatus(req, res, controller.handleRequest);
+    },
+    handleGetPopularPosts: (req, res, next) => {
+        model.getPopularPosts(req, res, controller.handleRequest);
     }
 };
 

@@ -2,8 +2,12 @@ const express = require('express');
 const controller = require('../controller/controller.js');
 const router = express.Router();
 
+
 router.get('/last', (req, res, next) => {
    controller.getLastPostId(req, res, next);
+});
+router.get('/popular', (req, res, next) => {
+   controller.handleGetPopularPosts(req, res, next);
 });
 router.get('/:id', (req, res, next) => {
     controller.getData(req, res, 'posts', next);

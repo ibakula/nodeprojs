@@ -201,7 +201,7 @@ const model = {
                 {'result':'Failed!'}, null);
             }
             else {
-                if (row  && 'id' in row) {
+                if (row) {
                     next.handleRequest(next.request, next.respond,
                     row, null);
                 }
@@ -437,6 +437,24 @@ const model = {
         else {
            next(req, res, undefined, null);
         }
+    },
+    getPopularPosts: (req, res, next) => {
+        db.all("SELECT id, title, text, category_id, author_id, date FROM posts ORDER BY views ASC LIMIT 3;", 
+            (err, rows) => { 
+                if (err) {
+                    console.error("DB Error: could not fetch popular posts!");
+                    console.error(err.message);
+                    next(req, res, {}, null);
+                }
+                else {
+                    if (rows != undefined) {
+                        next(req, res, rows, null);
+                    }
+                    else {
+                        next(req, res, {}, null);
+                    }
+                }
+        });
     }
 };
 
