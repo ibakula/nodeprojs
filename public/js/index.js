@@ -149,7 +149,18 @@ function handleLoadArticlesFromEnd(response, type) {
 
 function loadUserUI() {
   document.getElementById("top").firstElementChild.firstElementChild.children[1].remove();
-  document.getElementById("top").firstElementChild.firstElementChild.lastElementChild.className = "col-sm";
+  let logoutBtn = document.createElement("li");
+  logoutBtn.className = "col-sm";
+  logoutBtn.appendChild(document.createElement("ul"));
+  logoutBtn.firstChild.className = "navbar-nav justify-content-sm-end";
+  logoutBtn.firstChild.appendChild(document.createElement("li"));
+  logoutBtn.firstChild.firstChild.className = "nav-item";
+  logoutBtn.firstChild.firstChild.appendChild(document.createElement("a"));
+  logoutBtn.firstChild.firstChild.firstChild.className = "nav-link";
+  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", "logout.html");
+  logoutBtn.firstChild.firstChild.firstChild.innerText = "Logout";
+  let list = document.getElementById("top").firstElementChild.firstElementChild;
+  list.insertBefore(logoutBtn, list.lastElementChild);
 }
 
 function handleLoadUserData(response) {
