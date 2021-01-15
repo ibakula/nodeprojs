@@ -30,7 +30,7 @@ function AddCategoryRelatedArticle(article, categoryId, categoryTitle) {
   articleElement.appendChild(document.createElement("div"));
   articleElement.lastElementChild.className = "col-sm";
   articleElement.lastElementChild
-  .appendChild(document.createElement("h5");
+  .appendChild(document.createElement("h5"));
   articleElement.lastElementChild
   .lastElementChild.className = "display-5 mb-4 text-primary";
   articleElement.lastElementChild
