@@ -29,7 +29,7 @@ function handleSelectLastIdFromCategories(response) {
     let lastId = response.data.id+1;
     if (content.children.length > 0) {
       for (let i = 0; i < content.children.length; ++i) {
-        content.children[i].remove();
+        content.firstElementChild.remove();
       }
     }
     content.appendChild(document.createElement("ul"));
