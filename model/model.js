@@ -26,7 +26,8 @@ const postsStruct = {
 
 const categoriesStruct = {
     'id' : 'number', 
-    'title' : 'string'
+    'title' : 'string',
+    'img' : 'string'
 };
 
 const commentsStruct = {
@@ -95,7 +96,7 @@ function createInsertStatmentBasedOnTableName(table, params) {
             '${params.categoryId}', '${params.authorId}', '0', '${now}');`;
             break;
         case `categories`:
-            sql += `(title) VALUES('${params.title}');`;
+            sql += `(title, img) VALUES('${params.title}', '${params.img}');`;
             break;
         case `users`:
             sql += `(first_name, last_name, password, email, signup_date, login_date)
