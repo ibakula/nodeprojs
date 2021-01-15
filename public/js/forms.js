@@ -1,4 +1,4 @@
-6var formsList = new Array();
+var formsList = [];
 
 for (var i = 0; i < document.forms.length; ++i) {
     if (document.forms.item(i) != null) {
@@ -85,6 +85,7 @@ function handleLoadUserData(response) {
     for (let i in response.data) {
       localStorage.setItem(i, response.data[i]);
     }
+    setTimeout(() => { window.location.href = "/index.html"; }, 2000);
   }
 }
 
@@ -122,8 +123,7 @@ function postOutput(response, formName, formIndex) {
       });*/
       output_div.innerHTML += merged + "</p>";
       output_div.className = "alert alert-success p-4 mt-3";
-      axios.get('/api/user/status', handleLoadUserData);
-      setTimeout(() => { window.location.href = "/index.html"; }, 4000);
+      axios.get('/api/user/status').catch(handleResponse).then(handleLoadUserData).catch(handleResponse);
     }
     else {
       output_div.className = "alert alert-danger p-4 mt-3";
