@@ -192,8 +192,8 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
 }
 
 const model = {
-    selectDataEnd: (next) => {
-        db.get("SELECT id FROM posts ORDER BY id DESC LIMIT 1;", (err, row) => {
+    selectDataEnd: (table, next) => {
+        db.get(`SELECT id FROM ${table} ORDER BY id DESC LIMIT 1;`, (err, row) => {
             if (err) {
                 console.error("DB Error couldnt fetch post from end!");
                 console.error(err.message);

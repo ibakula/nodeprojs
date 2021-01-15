@@ -1,13 +1,13 @@
 const model = require('../model/model.js');
 
 const controller = {
-    getLastPostId: (req, res, next) => {
+    getLastTableId: (req, res, route_name, next) => {
         next = {
             handleRequest: controller.handleRequest,
             request: req,
             respond: res
         }
-        model.selectDataEnd(next);
+        model.selectDataEnd(route_name, next);
     },
     getData: (req, res, route_name, next) => {
         next = {

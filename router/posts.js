@@ -4,7 +4,7 @@ const router = express.Router();
 
 
 router.get('/last', (req, res, next) => {
-   controller.getLastPostId(req, res, next);
+   controller.getLastTableId(req, res, 'posts', next);
 });
 router.get('/popular', (req, res, next) => {
    controller.handleGetPopularPosts(req, res, next);
