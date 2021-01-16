@@ -17,13 +17,18 @@ let userData = null;
 
 function clearContent(type) {
   if ((type == 'main' && articlesSection[type].children.length > 0) || (type == 'aside' && articlesSection[type].children.length > 1)) {
-    let items = new Array();
-    for (let i = (type == 'aside' ? 1 : 0); i < articlesSection[type].children.length; ++i) {
+    let items = [];
+    for (let i = (type == 'aside' ? 1 : 0);
+      i < articlesSection[type].children.length;
+       ++i) {
       items.push(articlesSection[type].children[i]);
     }
-    for (let i of items) {
-      i.remove();
+    for (let i = 0; 
+      i < items.length; 
+      ++i) {
+      items[i].remove();
     }
+    items = [];
   }
 }
 

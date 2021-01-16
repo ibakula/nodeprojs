@@ -73,6 +73,7 @@ function wipeAllContent(section) {
       ++i) {
       items[i].remove();
     }
+    items = [];
   }
 }
 

@@ -6,24 +6,24 @@ function handleAddContent(response, listElement) {
     else {
       listElement.insertBefore(document.createElement("li"), listElement.firstChild);
     }
-    listElement.lastElementChild.className = "col-sm-auto m-2";
-    listElement.lastElementChild.appendChild(document.createElement("img"));
-    listElement.lastElementChild
+    listElement.firstElementChild.className = "col-sm-auto m-2";
+    listElement.firstElementChild.appendChild(document.createElement("img"));
+    listElement.firstElementChild
     .lastElementChild.setAttribute("src", response.data.img);
-    listElement.lastElementChild
+    listElement.firstElementChild
     .lastElementChild.setAttribute("width", "240px");
-    listElement.lastElementChild
+    listElement.firstElementChild
     .lastElementChild.setAttribute("height", "180px"); 
-    listElement.lastElementChild
+    listElement.firstElementChild
     .lastElementChild.setAttribute("alt", "Category Image");
-    listElement.lastElementChild.appendChild(document.createElement("a"));
-    listElement.lastElementChild
+    listElement.firstElementChild.appendChild(document.createElement("a"));
+    listElement.firstElementChild
     .lastElementChild.setAttribute("href", ("category.html?id="+response.data.id));
-    listElement.lastElementChild
+    listElement.firstElementChild
     .lastElementChild.appendChild(document.createElement("h2"));
-    listElement.lastElementChild
+    listElement.firstElementChild
     .lastElementChild.lastElementChild.className = "d-block bg-dark text-white p-2 font-weight-light h2-width-240";
-    listElement.lastElementChild
+    listElement.firstElementChild
     .lastElementChild.lastElementChild.innerText = response.data.title;
   } 
 }
@@ -36,11 +36,15 @@ function handleSelectLastIdFromCategories(response) {
   if (response && 'id' in response.data) {
     let lastId = response.data.id+1;
     let contentArr = [];
-    for (let i in content.children) {
-      contentArr.push(i);
+    for (let i = 0; 
+      i < content.children.length; 
+      ++i) {
+      contentArr.push(content.children[i]);
     }
-    for (let i in contentArr) {
-      i.remove();
+    for (let i = 0; 
+      i < contentArr.length; 
+      ++i) {
+      contentArr[i].remove();
     }
     contentArr = [];
     content.appendChild(document.createElement("ul"));
