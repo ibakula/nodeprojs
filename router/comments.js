@@ -2,6 +2,9 @@ const express = require('express');
 const controller = require('../controller/controller.js');
 const router = express.Router();
 
+router.get('/post/:postId', (req, res, next) => {
+    controller.selectCommentsByPostId(req, res, next);
+});
 router.get('/:id', (req, res, next) => {
     controller.getData(req, res, 'comments', next);
 });

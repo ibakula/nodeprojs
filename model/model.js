@@ -193,7 +193,37 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
 }
 
 const model = {
+    selectCommentsDataByPostId: (req, res, next) => {
+        // Validity check, prevent execution of a query if false
+        if (!containsValidInput('comments', req.params)) {
+            next.handleRequest(req, res, {'result':'Failed!',
+            'reason':'input compliance fallthrough'}, null);
+            return;
+        }
+
+        db.all(`SELECT * FROM comments WHERE post_id = ${req.params.postId} ORDER BY id DESC LIMIT 10;`, 
+          (err, rows) => {
+              if (err) {
+                console.error("DB Error: couldnt fetch comments data by posts id.");
+                console.error(err.message);
+                next(req, res, { 'result' : 'Failed' }, null);
+              }
+              else {
+                  if (rows && 'id' in rows) {
+                      next(req, res, rows, null);
+                  }
+                  else {
+                      next(req, res, {}, null);
+                  }
+              }
+        });
+    },
     selectDataEnd: (table, next) => {
+        if (!containsValidInput(table, req.params)) {
+            next.handleRequest(next.request, next.respond, {'result':'Failed!',
+            'reason':'input compliance fallthrough'}, null);
+            return;
+        }
         db.get(`SELECT id FROM ${table} ORDER BY id DESC LIMIT 1;`, (err, row) => {
             if (err) {
                 console.error("DB Error couldnt fetch post from end!");
@@ -428,12 +458,12 @@ const model = {
     getUserStatus: (req, res, next) => {
         if (req.session && 'userId' in req.session) {
             let userData = { 
-                userId: req.session.userId, 
+                id: req.session.userId, 
                 permissions: req.session.permissions,
-                firstName: req.session.firstName, 
-                lastName: req.session.lastName, 
+                first_name: req.session.firstName, 
+                last_name: req.session.lastName, 
                 email: req.session.email,
-                lastLogin: req.session.lastLogin
+                last_login: req.session.lastLogin
              };
              next(req, res, userData, null);
         }

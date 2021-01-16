@@ -1,6 +1,9 @@
 const model = require('../model/model.js');
 
 const controller = {
+    selectCommentsByPostId: (req, res, next) => {
+        model.selectCommentsDataByPostId(req, res, controller.handleRequest);
+    },
     getLastTableId: (req, res, route_name, next) => {
         next = {
             handleRequest: controller.handleRequest,
