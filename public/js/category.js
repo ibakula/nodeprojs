@@ -4,7 +4,7 @@
  *
  */
 
-let url = new URLSearchParams(window.location.search);
+let params = new URLSearchParams(window.location.search);
 let categoryId = -1;
 let titleSection = document.getElementById("title");
 let contentSection = document.getElementById("content");
@@ -142,7 +142,7 @@ function handleGetCategory(response) {
 }
 
 function resetAll() {
-  url = new URLSearchParams(window.location.search);
+  params = new URLSearchParams(window.location.search);
   categoryId = -1;
   lastPostId = -1;
   oldContentIsWiped = false;
@@ -170,12 +170,16 @@ function loadUserUI() {
 
 if (categoryId == -1) {
   loadUserUI();
-  let strId = url.get('id');
+  if (!params.has("id")) {
+    alert("Could not load content, redirecting..");
+    setTimeout(() => { window.location.href = "/"; }, 4000);
+  }
+  let strId = params.get('id');
   if (strId !== null) {
     let id = parseInt(strId);
     if (Number.isSafeInteger(id)) {
       axios.get(('/api/categories/'+id)).catch(handleError).then(handleGetCategory).catch(handleError);
     }
   }
-  resetAll();
+  //resetAll();
 }
