@@ -81,7 +81,7 @@ function handleFormSubmit(e, formName, formIndex) {
 }
 
 function handleLoadUserData(response) {
-  if (response.data && 'userId' in response.data) {
+  if (response.data && 'id' in response.data) {
     for (let i in response.data) {
       localStorage.setItem(i, response.data[i]);
     }

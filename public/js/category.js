@@ -149,7 +149,7 @@ function resetAll() {
 }
 
 function loadUserUI() {
-  if (localStorage.getItem("userId") === null || localStorage.getItem("permissions") == null) {
+  if (localStorage.getItem("id") === null || localStorage.getItem("permissions") == null) {
     return;
   }
 

@@ -23,6 +23,7 @@ let subscriptionElement = null;
 main();
 
 function main() {
+  if (localStorage.getItem("user_id")"
   loadUserUI();
   let strId = params.get('id');
   if (strId == null) {
@@ -43,10 +44,51 @@ function main() {
   .then((response) => { handleGetPopularArticles(response, 'aside'); })
   .catch(handleGetError);
   // And now recommended articles
-  axios.get('/api/posts/last')
+  setTimeout(() => { axios.get('/api/posts/last')
   .catch(handleGetError)
   .then(handleGetArticlesFromEnd)
+  .catch(handleGetError); }, 3000);
+  // Load comments
+  axios.get(('/api/comments/post/'+id))
+  .catch(handleGetError)
+  .then(handleGetComments)
   .catch(handleGetError);
+}
+
+function handleGetComments(response) {
+  if (response.data == null || !('id' in response.data)) {
+    return;
+  }
+  let commentSection = document.querySelector("footer").previousElementSibling.firstElementChild;
+  let elements = [];
+  for (let i = 3; 
+    i < commentSection.children.length; 
+    ++i) {
+    elements.push(commentSection.children[i]);
+  }
+  for (let item of elements) {
+    item.remove();
+  }
+  elements = [];
+  for (let item of response.data) {
+    axios.get(('/api/user/'+item.user_id))
+    .catch(handleGetError)
+    .then(res => { handleGetUser(res, commentSection, response.data.text); })
+    .catch(handleGetError);
+  }
+}
+
+function handleGetUser(res, element, text) {
+  if (!res || !('id' in res)) {
+    return;
+  }
+  let date = new Date(parseInt(res.date));
+  element.appendChild(document.createElement("div"));
+  element.lastElementChild.appendChild(document.createElement("p"));
+  element.lastElementChild
+  .lastElementChild.innerText = `Written by ${res.first_name} ${res.last_name} on ` + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+  element.lastElementChild.appendChild(document.createElement("p"));
+  element.lastElementChild.lastElementChild.innerText = text; 
 }
 
 function handleGetArticlesFromEnd(response) {
@@ -171,7 +213,7 @@ function createNewArticle(type = 'main', data) {
 }
 
 function loadUserUI() {
-  if (localStorage.getItem("userId") === null || localStorage.getItem("permissions") == null) {
+  if (localStorage.getItem("id") === null || localStorage.getItem("permissions") == null) {
     document.getElementById("top").nextElementSibling.remove();
     return;
   }

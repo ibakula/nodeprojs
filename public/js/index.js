@@ -166,19 +166,19 @@ function loadUserUI() {
 }
 
 function handleLoadUserData(response) {
-  if (response.data && 'userId' in response.data) {
+  if (response.data && 'id' in response.data) {
     for (let i in response.data) {
       localStorage.setItem(i, response.data[i]);
     }
     loadUserUI();
   }
   else {
-    localStorage.removeItem('userId');
+    localStorage.removeItem('id');
     localStorage.removeItem('permissions');
     localStorage.removeItem('email');
-    localStorage.removeItem('firstName');
-    localStorage.removeItem('lastName');
-    localStorage.removeItem('lastLogin');
+    localStorage.removeItem('first_name');
+    localStorage.removeItem('last_name');
+    localStorage.removeItem('last_login');
   }
 }
 
