@@ -38,6 +38,8 @@ function AddCategoryRelatedArticle(article, categoryId, categoryTitle) {
   articleElement.lastElementChild
   .appendChild(document.createElement("a"));
   articleElement.lastElementChild
+  .lastElementChild.setAttribute("href", ("article.html?id="+article.id));
+  articleElement.lastElementChild
   .lastElementChild.appendChild(document.createElement("h3"));
   articleElement.lastElementChild
   .lastElementChild.lastElementChild.className = "display-5 card-title";
@@ -48,8 +50,7 @@ function AddCategoryRelatedArticle(article, categoryId, categoryTitle) {
   articleElement.lastElementChild
   .lastElementChild.className = "text-muted";
   articleElement.lastElementChild
-  .lastElementChild.innerText = 
-  (articleDate.getDate() + "." (articleDate.getMonth()+1));
+  .lastElementChild.innerText = articleDate.getDate() + "." + (articleDate.getMonth()+1) + ".";
   articleElement.lastElementChild
   .appendChild(document.createElement("p"));
   articleElement.lastElementChild
@@ -59,11 +60,19 @@ function AddCategoryRelatedArticle(article, categoryId, categoryTitle) {
   contentSection.appendChild(articleElement);
 }
 
-function wipeAllContent() {
-  for (let i = 0;
-    i < contentSection.children.length;
-    ++i) {
-    contentSection.fristElementChild.remove();
+function wipeAllContent(section) {
+  if (section.children.length > 0) {
+    let items = new Array();
+    for (let i = 0;
+      i < section.children.length;
+      ++i) {
+      items.push(section.children[i]);
+    }
+    for (let i = 0;
+      i < items.length;
+      ++i) {
+      items[i].remove();
+    }
   }
 }
 
@@ -72,13 +81,13 @@ function handleAddCategoryRelatedArticle(response, categoryId, categoryTitle) {
     return;
   }
   
-  if (response.data.categoryId == categoryId) {
+  if (response.data['category_id'] == categoryId) {
     // Purpose of this is that this function
     // will get multiple calls and this is ought
     // to be executed only once
     if (!oldContentIsWiped) {
       if (contentSection.children.length > 0) {
-        wipeAllContent();
+        wipeAllContent(contentSection);
       }
       oldContentIsWiped = true;
     }
@@ -92,11 +101,14 @@ function handleError(error) {
 function handleListPostsByCategoryId(response, categoryId, categoryTitle) {
   if (response.data === null || !('id' in response.data)) {
     return;
-   }
+  }
 
   lastPostId = (response.data.id+1);
-  for (let i = lastPostId; i < lastPostId; --i) {
-    if (i >= maxPostsPerPage) {
+  let n = 0;
+  for (let i = response.data.id;
+       i < lastPostId && i > 0;
+       --i, ++n) {
+    if (n >= maxPostsPerPage) {
       lastPostId = (i+1);
       break;
     }
@@ -111,12 +123,7 @@ function handleGetCategory(response) {
   if (response.data === null || !('id' in response.data)) {
     return;
   }
-
-  for (let i = 0;
-    i < titleSection.children.length;
-    ++i) {
-    titleSection.fristElementChild.remove();
-  }
+  wipeAllContent(titleSection);
   titleSection.appendChild(document.createElement("img"));
   titleSection.lastElementChild.setAttribute("width", "280px");
   titleSection.lastElementChild.setAttribute("height", "180px");
@@ -125,11 +132,11 @@ function handleGetCategory(response) {
   titleSection.appendChild(document.createElement("h2"));
   titleSection.lastElementChild.className = "mt-4 display-5 text-white";
   titleSection.lastElementChild.appendChild(document.createElement("em"));
-  titleSection.lastElementChild.lastElementChild.innerText = response.data.title;
+  titleSection.lastElementChild.lastElementChild.innerText = `You are vieweing the ${response.data.title.toLowerCase()} category`;
   
   axios.get('/api/posts/last')
   .catch(handleError)
-  .then(response => { handleListPostsByCategoryId(response, response.data.id, response.data.title); })
+  .then(res => { handleListPostsByCategoryId(res, response.data.id, response.data.title); })
   .catch(handleError);
 }
 
@@ -140,12 +147,33 @@ function resetAll() {
   oldContentIsWiped = false;
 }
 
+function loadUserUI() {
+  if (localStorage.getItem("userId") === null || localStorage.getItem("permissions") == null) {
+    return;
+  }
+
+  document.getElementById("top").firstElementChild.firstElementChild.children[1].remove();
+  let logoutBtn = document.createElement("li");
+  logoutBtn.className = "col-sm";
+  logoutBtn.appendChild(document.createElement("ul"));
+  logoutBtn.firstChild.className = "navbar-nav justify-content-sm-end";
+  logoutBtn.firstChild.appendChild(document.createElement("li"));
+  logoutBtn.firstChild.firstChild.className = "nav-item";
+  logoutBtn.firstChild.firstChild.appendChild(document.createElement("a"));
+  logoutBtn.firstChild.firstChild.firstChild.className = "nav-link";
+  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", "logout.html");
+  logoutBtn.firstChild.firstChild.firstChild.innerText = "Logout";
+  let list = document.getElementById("top").firstElementChild.firstElementChild;
+  list.insertBefore(logoutBtn, list.lastElementChild);
+}
+
 if (categoryId == -1) {
+  loadUserUI();
   let strId = url.get('id');
   if (strId !== null) {
     let id = parseInt(strId);
     if (Number.isSafeInteger(id)) {
-      axios.get(('/api/category'+id)).catch(handleError).then(handleGetCategory).catch(handleError);
+      axios.get(('/api/categories/'+id)).catch(handleError).then(handleGetCategory).catch(handleError);
     }
   }
   resetAll();
