@@ -13,7 +13,7 @@ function handleAddContent(response, listElement) {
     .lastElementChild.setAttribute("alt", "Category Image");
     listElement.lastElementChild.appendChild(document.createElement("a"));
     listElement.lastElementChild
-    .lastElementChild.setAttribute("href", ("category.html#"+response.data.id));
+    .lastElementChild.setAttribute("href", ("category.html?id="+response.data.id));
     listElement.lastElementChild
     .lastElementChild.appendChild(document.createElement("h2"));
     listElement.lastElementChild
@@ -21,6 +21,9 @@ function handleAddContent(response, listElement) {
     listElement.lastElementChild
     .lastElementChild.lastElementChild.innerText = response.data.title;
   } 
+}
+
+function handleError(error) {
 }
 
 function handleSelectLastIdFromCategories(response) {
@@ -33,13 +36,15 @@ function handleSelectLastIdFromCategories(response) {
       }
     }
     content.appendChild(document.createElement("ul"));
-    content.style = 'list-style-type:none;';
-    content.className = 'p-0';
-    for (let i = lastId; 
+    content.lastElementChild.style = 'list-style-type:none;';
+    content.lastElementChild.className = 'row p-0';
+    for (let i = response.data.id; 
          i < lastId && i > 0; //LastId can be used for paging 
          --i) {
-      axios.post(('/api/categories/' + (lastId)), 
-        response => { handleAddContent(response, content.firstChild); });
+      axios.get(('/api/categories/'+i))
+      .catch(handleError) 
+      .then(response => { handleAddContent(response, content.lastElementChild); })
+      .catch(handleError);
       /*
        * Notes/remarks: Should there be too many
        * categories pagination control is to be
@@ -83,6 +88,7 @@ function loadUserUI() {
 function handleError(error) {
 }
 
+// This is for logged-in users
 loadUserUI();
 
 axios.get('/api/categories')
