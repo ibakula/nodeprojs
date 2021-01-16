@@ -108,7 +108,7 @@ function handleGetArticleAndFindSimilarTopics(response, keywords) {
   for (let i = 0;
     i < keywords.length;
     ++i) {
-    if (response.data.text.search(keywords[i]) > -1) {
+    if ((response.data.text.search(keywords[i]) > -1) || (response.data.title.search(keywords[i]) > -1)) {
       ++keywordPoints;
       if (keywordPoints > 1) {
         addRecommendedArticle(response.data);
