@@ -3,7 +3,8 @@ let id = -1;
 let sectionElements = {
   'articleSection' : document.getElementById("content").firstElementChild.firstElementChild,
   'aside' : document.getElementById("content").lastElementChild,
-  'recommendation' : document.getElementById("content").nextElementSibling.lastElementChild
+  'recommendation' : document.getElementById("content").nextElementSibling.lastElementChild,
+  'comments' : document.querySelector("footer").previousElementSibling.firstElementChild
 }
 
 let confLoadMaxArticles = {
@@ -23,14 +24,18 @@ let subscriptionElement = null;
 main();
 
 function main() {
-  if (localStorage.getItem("user_id")"
   loadUserUI();
+  if (!params.has("id")) {
+    alert("Could not load content, redirecting..");
+    setTimeout(() => { window.location.href = "/"; }, 4000);
+    return;
+  }
   let strId = params.get('id');
   if (strId == null) {
     return;
   }
   id = parseInt(strId);
-  if (!Number.isSafeInteger(id)) {
+  if (!Number.isSafeInteger(id) || id == null) {
     return;
   }
   // First load the article
@@ -53,42 +58,82 @@ function main() {
   .catch(handleGetError)
   .then(handleGetComments)
   .catch(handleGetError);
+  document.getElementById('commentary_form').lastElementChild.addEventListener("click", handleSendFormData);
+}
+
+function handleSendFormData(e) {
+  e.preventDefault();
+  if (localStorage.getItem("id") === null) {
+    alert("You need to be logged in first!");
+    return;
+  }
+  let params = new URLSearchParams();
+  params.append('postId', id);
+  params.append('userId', localStorage.getItem("id"));
+  params.append('text', document.getElementById('comment_text').value);
+  axios.post('/api/comments', params)
+  .catch(handleGetError)
+  .then(handlePostMethod)
+  .catch(handleGetError);
+}
+
+function handlePostMethod(res) {
+  if (!res.data || 
+    ('result' in res.data &&
+    (res.data['result'] == 'Failure!' || 
+     res.data['result'] == 'Failed!'))) {
+    alert("Error! Couldnt submit. Please check your session or validity of text input.");
+    return;
+  }
+  if (res.data.result == 'Success!') {
+    let date = new Date();
+    let divElement = document.createElement("div");
+    divElement.appendChild(document.createElement("p"));
+    divElement.lastElementChild.innerText = `Written by ` + localStorage.getItem("first_name") + " "  + localStorage.getItem("last_name") + ` on ` + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+    divElement.appendChild(document.createElement("p"));
+    divElement.lastElementChild.innerText = document.getElementById('comment_text').value;
+    sectionElements['comments'].insertBefore(divElement, sectionElements['comments'].children[3]);
+    document.getElementById('comment_text').value = "";
+  }
 }
 
 function handleGetComments(response) {
-  if (response.data == null || !('id' in response.data)) {
-    return;
-  }
-  let commentSection = document.querySelector("footer").previousElementSibling.firstElementChild;
   let elements = [];
-  for (let i = 3; 
-    i < commentSection.children.length; 
+  for (let i = 3;
+    i < sectionElements['comments'].children.length;
     ++i) {
-    elements.push(commentSection.children[i]);
+    elements.push(sectionElements['comments'].children[i]);
   }
   for (let item of elements) {
     item.remove();
   }
   elements = [];
+
+  if (response.data == null || 
+    !Array.isArray(response.data) || 
+    response.data.length < 1) {
+    return;
+  }
+  
   for (let item of response.data) {
-    axios.get(('/api/user/'+item.user_id))
+    axios.get(('/api/users/'+item.user_id))
     .catch(handleGetError)
-    .then(res => { handleGetUser(res, commentSection, response.data.text); })
+    .then(res => { handleGetUser(res, item.text, item.date); })
     .catch(handleGetError);
   }
 }
 
-function handleGetUser(res, element, text) {
-  if (!res || !('id' in res)) {
+function handleGetUser(res, text, commentDate) {
+  if (!res || !('id' in res.data)) {
     return;
   }
-  let date = new Date(parseInt(res.date));
-  element.appendChild(document.createElement("div"));
-  element.lastElementChild.appendChild(document.createElement("p"));
-  element.lastElementChild
-  .lastElementChild.innerText = `Written by ${res.first_name} ${res.last_name} on ` + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
-  element.lastElementChild.appendChild(document.createElement("p"));
-  element.lastElementChild.lastElementChild.innerText = text; 
+  let date = new Date(parseInt(commentDate));
+  sectionElements['comments'].appendChild(document.createElement("div"));
+  sectionElements['comments'].lastElementChild.appendChild(document.createElement("p"));
+  sectionElements['comments'].lastElementChild
+  .lastElementChild.innerText = `Written by ${res.data.first_name} ${res.data.last_name} on ` + date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " " + date.getHours() + ":" + date.getMinutes();
+  sectionElements['comments'].lastElementChild.appendChild(document.createElement("p"));
+  sectionElements['comments'].lastElementChild.lastElementChild.innerText = text; 
 }
 
 function handleGetArticlesFromEnd(response) {
@@ -214,11 +259,13 @@ function createNewArticle(type = 'main', data) {
 
 function loadUserUI() {
   if (localStorage.getItem("id") === null || localStorage.getItem("permissions") == null) {
-    document.getElementById("top").nextElementSibling.remove();
+    document.getElementById("top").nextElementSibling.style = "display:none;";
     return;
   }
-  
-  document.getElementById("top").firstElementChild.firstElementChild.children[1].remove();
+  let topElement = document.getElementById("top");
+  topElement.nextElementSibling.lastElementChild.lastElementChild.innerText = localStorage.getItem("first_name") + " " + localStorage.getItem("last_name");
+  topElement.nextElementSibling.style = "";
+  topElement.firstElementChild.firstElementChild.children[1].remove();
   let logoutBtn = document.createElement("li");
   logoutBtn.className = "col-sm";
   logoutBtn.appendChild(document.createElement("ul"));
@@ -227,10 +274,33 @@ function loadUserUI() {
   logoutBtn.firstChild.firstChild.className = "nav-item";
   logoutBtn.firstChild.firstChild.appendChild(document.createElement("a"));
   logoutBtn.firstChild.firstChild.firstChild.className = "nav-link";
-  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", "logout.html");
+  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", ("article.html?"+id));
   logoutBtn.firstChild.firstChild.firstChild.innerText = "Logout";
-  let list = document.getElementById("top").firstElementChild.firstElementChild;
+  logoutBtn.addEventListener("click", handleDestroySession);
+  let list = topElement.firstElementChild.firstElementChild;
   list.insertBefore(logoutBtn, list.lastElementChild);
+}
+
+function handleDestroySession(e) {
+  e.preventDefault();
+  axios.get('/api/user/logout')
+  .catch(handleGetError)
+  .then(handleDestroyCookie)
+  .catch(handleGetError);
+}
+
+function handleDestroyCookie(response) {
+  if (!response.data || ('result' in response.data && response.data.result != 'Success!')) {
+    return;
+  }
+  alert("You are logging out, you will be redirected..");
+  localStorage.removeItem("id");
+  localStorage.removeItem("permissions");
+  localStorage.removeItem("first_name");
+  localStorage.removeItem("last_name");
+  localStorage.removeItem("email");
+  localStorage.removeItem("last_login");
+  setTimeout(() => { window.location.reload(); }, 1000);
 }
 
 function handleGetError(error) {

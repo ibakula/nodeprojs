@@ -201,7 +201,7 @@ const model = {
             return;
         }
 
-        db.all(`SELECT * FROM comments WHERE post_id = ${req.params.postId} ORDER BY id DESC LIMIT 10;`, 
+        db.all(`SELECT * FROM comments WHERE post_id = '${req.params.postId}' ORDER BY id DESC LIMIT 10;`, 
           (err, rows) => {
               if (err) {
                 console.error("DB Error: couldnt fetch comments data by posts id.");
@@ -209,7 +209,7 @@ const model = {
                 next(req, res, { 'result' : 'Failed' }, null);
               }
               else {
-                  if (rows && 'id' in rows) {
+                  if (rows && rows.length > 0) {
                       next(req, res, rows, null);
                   }
                   else {
@@ -219,11 +219,6 @@ const model = {
         });
     },
     selectDataEnd: (table, next) => {
-        if (!containsValidInput(table, req.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failed!',
-            'reason':'input compliance fallthrough'}, null);
-            return;
-        }
         db.get(`SELECT id FROM ${table} ORDER BY id DESC LIMIT 1;`, (err, row) => {
             if (err) {
                 console.error("DB Error couldnt fetch post from end!");

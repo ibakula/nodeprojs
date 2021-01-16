@@ -121,7 +121,7 @@ function handleLoadPopularArticles(response, type) {
   if (response.data && Array.isArray(response.data)) {
     clearContent(type);
     for (let i = 0; i < response.data.length; ++i) {
-      setTimeout(() => { loadArticle(response.data[i], type); }, (2000*(i+1)));
+      loadArticle(response.data[i], type);
     }
   }
 }
@@ -142,8 +142,8 @@ function handleLoadArticlesFromEnd(response, type) {
         .catch(handleGetError)
         // Added timeout to give animation "perception"
         .then((response) => { 
-          setTimeout(() => { loadArticle(response.data, type) },
-          (2000 * (loadedCount+1))); });
+          loadArticle(response.data, type); 
+         });
       }
     }
   }
@@ -159,10 +159,33 @@ function loadUserUI() {
   logoutBtn.firstChild.firstChild.className = "nav-item";
   logoutBtn.firstChild.firstChild.appendChild(document.createElement("a"));
   logoutBtn.firstChild.firstChild.firstChild.className = "nav-link";
-  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", "logout.html");
+  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", "");
   logoutBtn.firstChild.firstChild.firstChild.innerText = "Logout";
+  logoutBtn.addEventListener("click", handleDestroySession);
   let list = document.getElementById("top").firstElementChild.firstElementChild;
   list.insertBefore(logoutBtn, list.lastElementChild);
+}
+
+function handleDestroySession(e) {
+  e.preventDefault();
+  axios.get('/api/user/logout')
+  .catch(handleGetError)
+  .then(handleDestroyCookie)
+  .catch(handleGetError);
+}
+
+function handleDestroyCookie(response) {
+  if (!response.data || ('result' in response.data && response.data.result != 'Success!')) {
+    return;
+  }
+  alert("You are logging out, you will be redirected..");
+  localStorage.removeItem("id");
+  localStorage.removeItem("permissions");
+  localStorage.removeItem("first_name");
+  localStorage.removeItem("last_name");
+  localStorage.removeItem("email");
+  localStorage.removeItem("last_login");
+  setTimeout(() => { window.location.reload(); }, 1000);
 }
 
 function handleLoadUserData(response) {
