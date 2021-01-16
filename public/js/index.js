@@ -15,9 +15,15 @@ const loadArticlesConf = {
 };
 let userData = null;
 
-function clearContent(tag) {
-  for (let element of tag.children) {
-    tag.remove();
+function clearContent(type) {
+  if ((type == 'main' && articlesSection[type].children.length > 0) || (type == 'aside' && articlesSection[type].children.length > 1)) {
+    let items = new Array();
+    for (let i = (type == 'aside' ? 1 : 0); i < articlesSection[type].children.length; ++i) {
+      items.push(articlesSection[type].children[i]);
+    }
+    for (let i of items) {
+      i.remove();
+    }
   }
 }
 
@@ -27,7 +33,7 @@ function clearContent(tag) {
 */
 function splitData(data) {
   let skimmedData = { 
-    img : '<img alt="Article image" src="/img/NotFound.jpg" width="160px" height="100px">', 
+    img : '', 
     text : '' 
   };
 
@@ -64,12 +70,13 @@ function createNewArticle(type = 'main', data) {
       let date = new Date(parseInt(data.date));
       article.appendChild(document.createElement("div"));
       article.lastElementChild.className = "col-sm-auto";
-      article.lastElementChild.innerHTML = skimmed.img;
-      article.lastElementChild.lastElementChild.innerHTML = skimmed.img;
+      if (skimmed.img.length > 0) {
+          article.lastElementChild.innerHTML = skimmed.img;
+      }
       article.appendChild(document.createElement("div"));
       article.lastElementChild.className = "col-sm";
       article.lastElementChild.appendChild(document.createElement("a"));
-      article.lastElementChild.lastElementChild.setAttribute("href", "article.html#");
+      article.lastElementChild.lastElementChild.setAttribute("href", ("article.html?id="+data.id));
       article.lastElementChild.lastElementChild.appendChild(document.createElement("h1"));
       article.lastElementChild.lastElementChild.lastElementChild.className = "mb-0";
       article.lastElementChild.lastElementChild.lastElementChild.innerText = data.title;
@@ -80,13 +87,15 @@ function createNewArticle(type = 'main', data) {
       article.lastElementChild.lastElementChild.innerText = skimmed.text;
       break;
     case 'aside':
-      article.innerHTML = skimmed.img;
+      if (skimmed.img.length > 0) {
+          article.innerHTML = skimmed.img;
+      }
       article.appendChild(document.createElement("a"));
-      article.lastElementChild.setAttribute("href", "article.html");
+      article.lastElementChild.setAttribute("href", ("article.html?id="+data.id));
       article.lastElementChild.appendChild(document.createElement("h3"));
       article.lastElementChild.lastElementChild.innerText = data.title;
       article.appendChild(document.createElement("p"));
-      article.lastElementChild.className = "lead";
+      article.lastElementChild.className = "lead overflow-hidden";
       article.lastElementChild.innerText = skimmed.text;
       break;
   }
@@ -95,9 +104,6 @@ function createNewArticle(type = 'main', data) {
 
 function loadArticle(data, type) {
   if (data && 'text' in data) {
-    // Old content flush
-    //clearContent(mainTag);
-    //clearContent(asideTag);
     let article = createNewArticle(type, data);
     if (type == 'main') {
       article.className = "row overflow-hidden lead";
@@ -108,19 +114,18 @@ function loadArticle(data, type) {
 
 function handleLoadPopularArticles(response, type) {
   if (response.data && Array.isArray(response.data)) {
+    clearContent(type);
     for (let i = 0; i < response.data.length; ++i) {
       setTimeout(() => { loadArticle(response.data[i], type); }, (2000*(i+1)));
     }
   }
-  setTimeout(() => {
-      articlesSection[type].children[1].remove();
-  }, (4000*loadArticlesConf[type]));
 }
 
 function handleLoadArticlesFromEnd(response, type) {
   if (response.data && 'id' in response.data && response.data.id > 0) {
     lastLoadedPost[type] = response.data.id;
     if (lastLoadedPost[type] > 0) {
+      clearContent(type);
       for (let loadedCount = 0; 
            lastLoadedPost[type] > 0;
             --lastLoadedPost[type], ++loadedCount) {
@@ -135,14 +140,6 @@ function handleLoadArticlesFromEnd(response, type) {
           setTimeout(() => { loadArticle(response.data, type) },
           (2000 * (loadedCount+1))); });
       }
-      setTimeout(() => { 
-          if (type == 'main') {
-            articlesSection[type].firstElementChild.remove();
-          }
-          else if (type == 'aside') {
-            articlesSection[type].children[1].remove();
-          }
-        }, (4000*loadArticlesConf[type]));
     }
   }
 }
