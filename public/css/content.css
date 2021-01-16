@@ -22,6 +22,10 @@ section#content main article, section#content > section article {
     padding:1em;
 }
 
+section#content + section div article {
+    max-width:300px;
+}
+
 section#content main article div + div {
     overflow: hidden!important;
 }
