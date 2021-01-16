@@ -38,4 +38,9 @@ section#content main article:hover {
 
 section#content aside {
     margin-left:20px;
+    max-width:250px;
+}
+
+section#content aside article p {
+    max-height:120px;
 }
