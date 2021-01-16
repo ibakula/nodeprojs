@@ -1,6 +1,11 @@
 function handleAddContent(response, listElement) {
   if (response && 'id' in response.data) {
-    listElement.appendChild(document.createElement("li"));
+    if (listElement.firstElementChild == null) {
+      listElement.appendChild(document.createElement("li"));
+    }
+    else {
+      listElement.insertBefore(document.createElement("li"), listElement.firstChild);
+    }
     listElement.lastElementChild.className = "col-sm-auto m-2";
     listElement.lastElementChild.appendChild(document.createElement("img"));
     listElement.lastElementChild
@@ -30,11 +35,14 @@ function handleSelectLastIdFromCategories(response) {
   let content = document.getElementById("content");
   if (response && 'id' in response.data) {
     let lastId = response.data.id+1;
-    if (content.children.length > 0) {
-      for (let i = 0; i < content.children.length; ++i) {
-        content.firstElementChild.remove();
-      }
+    let contentArr = [];
+    for (let i in content.children) {
+      contentArr.push(i);
     }
+    for (let i in contentArr) {
+      i.remove();
+    }
+    contentArr = [];
     content.appendChild(document.createElement("ul"));
     content.lastElementChild.style = 'list-style-type:none;';
     content.lastElementChild.className = 'row p-0';
