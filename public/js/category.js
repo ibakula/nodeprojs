@@ -4,6 +4,12 @@
  *
  */
 
+// Note: (isLoaded)
+// currently needed by search function 
+// in order to schedule search events
+// evaluates to true once the last category (id 1)
+// has been loaded by handleAddCategoryRelatedArticle
+let isLoaded = false;
 let params = new URLSearchParams(window.location.search);
 let categoryId = -1;
 let titleSection = document.getElementById("title");
@@ -93,6 +99,9 @@ function handleAddCategoryRelatedArticle(response, categoryId, categoryTitle) {
       oldContentIsWiped = true;
     }
     AddCategoryRelatedArticle(response.data, categoryId, categoryTitle);
+    if (categoryId == 1) {
+      isLoaded = true;
+    }
   }
 }
 

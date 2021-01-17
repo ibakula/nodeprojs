@@ -1,3 +1,5 @@
+let isLoaded = false;
+
 function handleAddContent(response, listElement) {
   if (response && 'id' in response.data) {
     if (listElement.firstElementChild == null) {
@@ -25,6 +27,9 @@ function handleAddContent(response, listElement) {
     .lastElementChild.lastElementChild.className = "d-block bg-dark text-white p-2 font-weight-light h2-width-240";
     listElement.firstElementChild
     .lastElementChild.lastElementChild.innerText = response.data.title;
+    if (response.data.id == 1) {
+      isLoaded = true;
+    }
   } 
 }
 

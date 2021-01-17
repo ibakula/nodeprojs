@@ -1,5 +1,7 @@
+let isLoaded = true;
 
 if (localStorage.getItem("user_id") !== null) {
+  isLoaded = false;
   let registerForm = document.getElementById("register_form");
   for (let i = 0; i < registerForm.children.length; ++i) {
     registerForm.children[i].remove();

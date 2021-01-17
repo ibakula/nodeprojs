@@ -1,3 +1,7 @@
+// Note:
+// isLoaded is currently used for the search function!
+// In index.js isLoaded is set to true once
+// the most popular section has finished loading
 let isLoaded = false;
 // Styling for article children
 const articlesSection = {

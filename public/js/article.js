@@ -1,3 +1,4 @@
+let isLoaded = false;
 let params = new URLSearchParams(window.location.search);
 let id = -1;
 let sectionElements = {

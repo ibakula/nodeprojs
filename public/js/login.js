@@ -1,4 +1,8 @@
+// Do not load if user is logged in already
+let isLoaded = true;
+
 if (localStorage.getItem("userId") !== null) {
+  isLoaded = false;
   let loginForm = document.getElementById("login_form");
   for (let i = 0; i < loginForm.children.length; ++i) {
     loginForm.children[i].remove();
