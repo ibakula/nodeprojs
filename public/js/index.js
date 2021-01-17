@@ -1,3 +1,4 @@
+let isLoaded = false;
 // Styling for article children
 const articlesSection = {
   'main' : document.querySelector("main"),
@@ -123,6 +124,7 @@ function handleLoadPopularArticles(response, type) {
     for (let i = 0; i < response.data.length; ++i) {
       loadArticle(response.data[i], type);
     }
+    isLoaded = true;
   }
 }
 
