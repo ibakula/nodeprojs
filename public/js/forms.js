@@ -47,7 +47,7 @@ function _helperFuncUpdateOutputElement(outputName) {
     return output_div;
 }
 
-function handleResponse(err) {
+function handlePostError(err) {
   if (err.response) {
           
   }
@@ -68,12 +68,12 @@ function handleFormSubmit(e, formName, formIndex) {
       params.append("lastName", formsList[formIndex].querySelector("#register_lname").value);
       params.append("password", formsList[formIndex].querySelector("#register_password").value);
       params.append("email", formsList[formIndex].querySelector("#register_email").value);
-      axios.post('/api/users', params).catch(handleResponse).then((response) => { postOutput(response, formName, formIndex); }).catch(handleResponse);
+      axios.post('/api/users', params).catch(handlePostError).then((response) => { postOutput(response, formName, formIndex); }).catch(handlePostError);
       break;
     case 'login_form':
       params.append("email", formsList[formIndex].querySelector("#email").value);
       params.append("password", formsList[formIndex].querySelector("#password").value);
-      axios.post('api/user/login', params).catch(handleResponse).then((response) => { postOutput(response, formName, formIndex); }).catch(handleResponse);
+      axios.post('api/user/login', params).catch(handlePostError).then((response) => { postOutput(response, formName, formIndex); }).catch(handlePostError);
       break;
     case 'commentary_form':
       break;
@@ -123,7 +123,11 @@ function postOutput(response, formName, formIndex) {
       });*/
       output_div.innerHTML += merged + "</p>";
       output_div.className = "alert alert-success p-4 mt-3";
-      axios.get('/api/user/status').catch(handleResponse).then(handleLoadUserData).catch(handleResponse);
+      if (formName == "register_form") {
+        setTimeout(() => { window.location.href = "/login.html"; }, 2500); 
+        return;
+      }
+      axios.get('/api/user/status').catch(handlePostError).then(handleLoadUserData).catch(handlePostError);
     }
     else {
       output_div.className = "alert alert-danger p-4 mt-3";
