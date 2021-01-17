@@ -2,6 +2,9 @@ const express = require('express');
 const controller = require('../controller/controller.js');
 const router = express.Router();
 
+router.get('/last', (req, res, next) => {
+   controller.getLastTableId(req, res, 'comments', next);
+});
 router.get('/post/:postId', (req, res, next) => {
     controller.selectCommentsByPostId(req, res, next);
 });
