@@ -3,7 +3,7 @@ const searchForm = navBarList.lastElementChild.firstElementChild;
 const searchBtn = searchForm.lastElementChild;
 let info = false;
 let resultsFound = false;
-let finishedSearching = false;
+let finishedSearching = true;
 
 const siteContainer = document.body.firstElementChild;
 
@@ -11,9 +11,7 @@ searchBtn.addEventListener("click", handleSearchBtnClick);
 
 function handleSearchBtnClick(e) {
   e.preventDefault();
-  resultsFound = false;
-  finishedSearching = false;
-  if (!isLoaded) {
+  if (!isLoaded || !finishedSearching) {
     if (!info) {
       alert("Your search request will be executed after the initial requests are done executing.");
       info = true;
@@ -21,6 +19,8 @@ function handleSearchBtnClick(e) {
     setTimeout(() => { handleSearchBtnClick(e); }, 5000);
     return;
   }
+  resultsFound = false;
+  finishedSearching = false;
   let sections = siteContainer.getElementsByTagName("section");
   const sectionsLength = sections.length;
   for (let i = 0; i < sectionsLength; ++i) {
