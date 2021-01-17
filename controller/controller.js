@@ -1,6 +1,9 @@
 const model = require('../model/model.js');
 
 const controller = {
+    searchForTerm: (req, res, table, next) => {
+        model.findInTable(req, res, table, controller.handleRequest);
+    },
     selectCommentsByPostId: (req, res, next) => {
         model.selectCommentsDataByPostId(req, res, controller.handleRequest);
     },

@@ -193,6 +193,66 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
 }
 
 const model = {
+    findInTable: (req, res, table, next) => {
+        if (!('term' in req.body)) {
+            next(req, res, {'result':'Failed!',
+            'reason':'input compliance fallthrough'}, null);
+            return;
+        }
+        
+        let params = [];
+        switch (table) {
+            case 'users':
+               params.push("firstName");
+               params.push("lastName");
+               break;
+            case 'posts':
+               params.push("title")
+               params.push("text");
+               break;
+            case 'category':
+               params.push("title");
+               break;
+            case 'comments':
+               params.push("text");
+               break;
+        }
+
+        let sql = `SELECT * FROM ${table} WHERE `;
+        for (let item of params) {
+            let param = {};
+            param[item] = req.body.term;
+            if (!containsValidInput(table, param)) {
+                next(req, res, {'result':'Failed!',
+                'reason':'input compliance fallthrough'}, null);
+                return;
+            }
+            if (item.endsWith("Name")) {
+                item = item.replace("Name", "_name");
+            }
+            sql += `${item} LIKE '%${req.body.term}%' OR `;
+        }
+        
+        sql = sql.slice(0, (sql.length-4));
+        sql += ` ORDER BY id DESC;`;
+
+        db.all(sql, 
+          (err, rows) => {
+              if (err) {
+                console.error("DB Error: couldnt fetch table data.");
+                console.error(err.message);
+                next(req, res, { 'result' : 'Failed' }, null);
+              }
+              else {
+                  if (rows && rows.length > 0) {
+                      next(req, res, rows, null);
+                  }
+                  else {
+                      next(req, res, {}, null);
+                  }
+              }
+        });
+    },
     selectCommentsDataByPostId: (req, res, next) => {
         // Validity check, prevent execution of a query if false
         if (!containsValidInput('comments', req.params)) {

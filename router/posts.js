@@ -2,7 +2,9 @@ const express = require('express');
 const controller = require('../controller/controller.js');
 const router = express.Router();
 
-
+router.post('/search', (req, res, next) => {
+   controller.searchForTerm(req, res, 'posts', next);
+});
 router.get('/last', (req, res, next) => {
    controller.getLastTableId(req, res, 'posts', next);
 });
