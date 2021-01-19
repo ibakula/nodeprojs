@@ -7,7 +7,7 @@ if (db != null) {
     //db.run("CREATE TABLE categories (id INTEGER NOT NULL PRIMARY KEY, title TEXT NOT NULL, img TEXT DEFAULT '');");
     //db.run("CREATE TABLE users (id INTEGER NOT NULL PRIMARY KEY, first_name TEXT NOT NULL, last_name TEXT NOT NULL, password TEXT NOT NULL, email TEXT NOT NULL UNIQUE, permissions INTEGER DEFAULT 0, signup_date TEXT NOT NULL, login_date TEXT DEFAULT '');");
     //db.run("CREATE TABLE comments (id INTEGER NOT NULL PRIMARY KEY, post_id INTEGER NOT NULL, user_id INTEGER NOT NULL, text TEXT NOT NULL, date TEXT NOT NULL, last_edit TEXT DEFAULT '');");
-    db.run("CREATE TABLE subscribers (id INTEGER NOT NULL PRIMARY KEY, email TEXT NOT NULL);");
+    db.run("CREATE TABLE subscribers (id INTEGER NOT NULL PRIMARY KEY, email TEXT NOT NULL UNIQUE);");
     //db.run("INSERT INTO users (first_name, last_name, password, email, permissions, signup_date) VALUES ('John', 'Doe', 'testing', 'test@test.com', '0', '1610749084810');");
     //db.run("INSERT INTO users (first_name, last_name, password, email, permissions, signup_date) VALUES ('Max', 'Mustermann', 'testing', 'admin@test.com', '3', '1610749084810');");
     //db.run("INSERT INTO categories (title, img) VALUES ('Business and finance', 'https://cdn.pixabay.com/photo/2017/12/17/14/12/bitcoin-3024279_960_720.jpg');");
