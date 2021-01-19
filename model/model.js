@@ -39,6 +39,11 @@ const commentsStruct = {
     'lastEdit' : 'string'
 }
 
+const subscriberStruct = {
+    'id' : 'number',
+    'email' : 'string'
+}
+
 function separateTermsForSqlQuery(term, table) {
   let nextPos = -1;
   let termArr = [];
@@ -97,6 +102,9 @@ function containsValidInput(table, params) {
         case 'comments':
             struct = commentsStruct;
             break;
+        case 'subscribers':
+            struct = subscriberStruct;
+            break;
     }
     
     if (struct != null) {
@@ -115,6 +123,7 @@ function containsValidInput(table, params) {
                     params[i].search("FROM") > -1 ||
                     (i == 'email' && 
                     params[i].search("@") == -1))  {
+
                     return false;
                 }
                 hasRequiredParams = true;
@@ -146,6 +155,9 @@ function createInsertStatmentBasedOnTableName(table, params) {
             break;
         case 'comments':
             sql += `(post_id, user_id, text, date, last_edit) VALUES ('${params.postId}', '${params.userId}', '${params.text}', '${now}', '0');`;
+            break;
+        case 'subscribers':
+            sql += `(email) VALUES ('${params.email}');`;
             break;
     }
     return sql;
@@ -210,13 +222,16 @@ function hasPermissions(table, method, session, params, callback = null) {
                 return true;
             }
             break;
+        case 'subscribers':
+            reqPermission = 0;
+            break;
     }
 
-    if (session == false) {
+    if (session == false && reqPermission > 0) {
         return false;
     }
 
-    return session.permissions >= reqPermission;
+    return (session != false ? (session.permissions >= reqPermission) : (0 >= reqPermission));
 }
 
 function handleCheckCommentAuthor(commentId, userId, permission, callback) {
@@ -236,7 +251,6 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
 
 const model = {
     findInTable: (req, res, table, next) => {
-        
         if (!('term' in req.body)) {
             next(req, res, {'result':'Failed!',
             'reason':'input compliance fallthrough'}, null);
@@ -250,10 +264,9 @@ const model = {
           'reason':'input compliance fallthrough'}, null);
           return;
         }
-
-
+        
         let sql = separateTermsForSqlQuery(req.body.term, table);
- 
+        
         db.all(sql, 
           (err, rows) => {
               if (err) {
@@ -278,7 +291,7 @@ const model = {
             'reason':'input compliance fallthrough'}, null);
             return;
         }
-
+        
         db.all(`SELECT * FROM comments WHERE post_id = '${req.params.postId}' ORDER BY id DESC LIMIT 10;`, 
           (err, rows) => {
               if (err) {
@@ -317,7 +330,7 @@ const model = {
     },
     selectData: (table, next) => {
         // ToDo: make users table only select specific columns
-        // Validity check, prevent execution of a query if false    
+        // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.params)) {
             next.handleRequest(next.request, next.respond, {'result':'Failed!', 
             'reason':'input compliance fallthrough'}, null);
@@ -377,10 +390,10 @@ const model = {
                 return;
             }
         }
-        
+
         if (!hasPermissions(table, 'INSERT', ('userId' in next.request.session ? next.request.session : false), next.request.body)) {
             next.handleRequest(next.request, next.respond, 
-            {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
+            {'result':'Failed!', 'reason':'You do not have the required permissions!'}, 
             null);
             return;
         }
@@ -390,12 +403,12 @@ const model = {
             'reason':'input compliance fallthrough'}, null);
             return;
         }
-
+        
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body);
         db.run(sql, (err) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, 
-                { result: `Failure!` }, null);
+                { result: `Failed!` }, null);
                 console.error(`${table}: Could not complete INSERT operation!`);
                 console.error(err.message);
             }
@@ -421,7 +434,7 @@ const model = {
             ('userId' in next.request.session ? next.request.session : false),
             next.request.params)) {
             next.handleRequest(next.request, next.respond, 
-            {'result':'Failure!', 'reason':'You do not have the required permissions!'}, 
+            {'result':'Failed!', 'reason':'You do not have the required permissions!'}, 
             null);
             return;
         }
@@ -442,9 +455,9 @@ const model = {
             return;
         }
         
-        db.run(`DELETE FROM ${table} WHERE id = ${next.request.params.id};`, (err) => {
+        db.run(`DELETE FROM ${table} WHERE id = '${next.request.params.id}';`, (err) => {
             if (err != null) {
-                next.handleRequest(next.request, next.respond, { result: `Failure!` }, null);
+                next.handleRequest(next.request, next.respond, { result: `Failed!` }, null);
                 console.error(`${table}: Could not complete DELETE operation!`);
                 console.error(err.message);
             }
@@ -458,7 +471,7 @@ const model = {
         if (!hasPermissions(table, 'UPDATE',
            ('userId' in next.request.session ? next.request.session : false),
             next.request.params)) {
-            next.handleRequest(next.request, next.respond, {'result':'Failure!',
+            next.handleRequest(next.request, next.respond, {'result':'Failed!',
              'reason':'You do not have the required permissions!'}, null);
             return;
         }
