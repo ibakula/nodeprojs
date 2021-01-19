@@ -23,9 +23,10 @@ function handleSubscriptionAnswer(response) {
   subForm.parentElement.appendChild(document.createElement("p"));
   if (response.data && 
     'result' in response.data && 
-    response.data.result == 'Failure!') {
-    subForm.parentElement.lastElementChild.className = "text-warning";
-    subForm.parentElement.lastElementChild.innerText = "Failure! " + ('reason' in response.data ? response.data.reason : 'Unknown error on server-end has occured.');
+    response.data.result == 'Failed!') {
+    subForm.parentElement.lastElementChild.className = "text-danger";
+    subForm.parentElement.lastElementChild.innerHTML = "Sorry, could not add you to the list. " + ('reason' in response.data ? response.data.reason : '<br>You have possibly already enlisted.');
+    subForm.parentElement.appendChild("button");
     return;
   }
   subForm.parentElement.lastElementChild.className = "text-success";
