@@ -39,6 +39,48 @@ const commentsStruct = {
     'lastEdit' : 'string'
 }
 
+function separateTermsForSqlQuery(term, table) {
+  let nextPos = -1;
+  let termArr = [];
+  let params = {};
+  switch (table) {
+    case 'users':
+      params.firstName = "";;
+      params.lastName = "";
+      break;
+    case 'posts':
+      params.title = "";
+      params.text = "";
+      break;
+    case 'category':
+      params.title = "";
+      break;
+    case 'comments':
+      params.text = "";
+      break;
+  }
+ 
+  let sql = `SELECT * FROM ${table} WHERE `;
+  for (let item in params) {
+    let term2 = term;
+    do {
+      nextPos = term2.search(" ");
+      let word = term2.slice(0, (nextPos != -1 ? nextPos : term2.length))
+      let item2 = item;
+      if (item2.endsWith("Name")) {
+        item2 = item2.replace("Name", "_name");
+      }
+      term2 = term2.slice(nextPos+1, term2.length);
+      sql += `${item2} LIKE '%${word}%' AND `;
+    } while (nextPos != -1);   
+    sql = sql.slice(0, (sql.length-5));
+    sql += ' OR ';
+  }
+  sql = sql.slice(0, (sql.length-4));
+  sql += ` ORDER BY id DESC LIMIT 10;`;
+  return sql;
+}
+
 function containsValidInput(table, params) {
     let struct = null;
     
@@ -194,48 +236,24 @@ function handleCheckCommentAuthor(commentId, userId, permission, callback) {
 
 const model = {
     findInTable: (req, res, table, next) => {
+        
         if (!('term' in req.body)) {
             next(req, res, {'result':'Failed!',
             'reason':'input compliance fallthrough'}, null);
             return;
         }
-        
-        let params = [];
-        switch (table) {
-            case 'users':
-               params.push("firstName");
-               params.push("lastName");
-               break;
-            case 'posts':
-               params.push("title")
-               params.push("text");
-               break;
-            case 'category':
-               params.push("title");
-               break;
-            case 'comments':
-               params.push("text");
-               break;
+        // Validity function passed params 
+        //are intentionally contrived and fully valid
+        let params = { 'text' : req.body.term };
+        if (!containsValidInput('posts', params)) {
+          next(req, res, {'result':'Failed!',
+          'reason':'input compliance fallthrough'}, null);
+          return;
         }
 
-        let sql = `SELECT * FROM ${table} WHERE `;
-        for (let item of params) {
-            let param = {};
-            param[item] = req.body.term;
-            if (!containsValidInput(table, param)) {
-                next(req, res, {'result':'Failed!',
-                'reason':'input compliance fallthrough'}, null);
-                return;
-            }
-            if (item.endsWith("Name")) {
-                item = item.replace("Name", "_name");
-            }
-            sql += `${item} LIKE '%${req.body.term}%' OR `;
-        }
-        
-        sql = sql.slice(0, (sql.length-4));
-        sql += ` ORDER BY id DESC;`;
 
+        let sql = separateTermsForSqlQuery(req.body.term, table);
+ 
         db.all(sql, 
           (err, rows) => {
               if (err) {
