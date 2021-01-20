@@ -64,7 +64,7 @@ function handleLoadNextPost(response, count) {
       featured.children[2+count].children[i].innerText = response.data.title;
     }
     if (featured.children[2+count].children[i].tagName == "P") {
-      featured.children[2+count].children[i].innerText = skimmed.text.slice(0, 40);
+      featured.children[2+count].children[i].innerText = skimmed.text.slice(0, 100);
     }
   }
 }
