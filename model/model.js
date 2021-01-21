@@ -180,6 +180,7 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
         case `users`:
             sqlSet += ('firstName' in params ? `first_name = '${params.firstName}', ` : '') +
             ('lastName' in params ? `last_name = '${params.lastName}', ` : '') +
+            ('password' in params ? `password = '${params.password}', ` : '') +
             ('email' in params ? `email = '${params.email}', ` : '') +
             ('signupDate' in params ? `signup_date = '${params.signupDate}', ` : '') +
             ('loginDate' in params ? `login_date = '${params.loginDate}' ` : '');
@@ -194,8 +195,8 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
         sqlSet += " ";
     }
     
-    sqlSet += `WHERE id = ${id};`;
-    
+    sqlSet += `WHERE id = '${id}';`;
+    console.log(sqlSet);
     return sqlSet;
 }
 
@@ -330,6 +331,7 @@ const model = {
     },
     selectData: (table, next) => {
         // ToDo: make users table only select specific columns
+        // ToDo: add permissions check, example: userId 1 can change data for column matching userId 2
         // Validity check, prevent execution of a query if false
         if (!containsValidInput(table, next.request.params)) {
             next.handleRequest(next.request, next.respond, {'result':'Failed!', 
@@ -468,6 +470,8 @@ const model = {
         });
     },
     updateData: (table, next) => {
+        console.log(next.request.body);
+        console.log(next.request.params);
         if (!hasPermissions(table, 'UPDATE',
            ('userId' in next.request.session ? next.request.session : false),
             next.request.params)) {
