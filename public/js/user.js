@@ -85,7 +85,7 @@ function LoadFormData() {
     divGroup.lastElementChild.setAttribute("type", "text");
     divGroup.lastElementChild.className = "form-control form-control-md";
     divGroup.lastElementChild.id = `user_${item}`;
-    if (item == 'permissions' || item == 'last_login' || item == 'signup_date') {
+    if (item == 'permissions' || item == 'login_date' || item == 'signup_date') {
       divGroup.lastElementChild.disabled = true;
     }
     if (item == 'password') {
@@ -105,12 +105,60 @@ function LoadFormData() {
   userContent.lastElementChild.lastElementChild.className = "btn btn-primary";
   userContent.lastElementChild.lastElementChild.innerText = "Save changes";
   userContent.lastElementChild.lastElementChild.addEventListener("click", handleSaveUserChanges);
+  isLoaded = true;
 }
 
 function handleSaveUserChanges(e) {
   e.preventDefault();
+  isLoaded = false;
   let params = new URLSearchParams();
-  axios.post('');
+  userData['password'] = userContent.querySelector("#user_password").value;
+  for (let item in userData) {
+    if (item.search("date") > -1 || item == 'permissions') {
+      continue;
+    }
+    let field = userContent.querySelector(("#user_"+item));
+    if (userData[item] != field.value || (item == 'password' && 'password' in userData && userData[item].length > 5)) {
+      let _Pos = item.search("_");
+      let item2 = item;
+      if (_Pos > -1) {
+        item2 = item2.replace(item2.charAt((_Pos+1)), item2.charAt((_Pos+1)).toUpperCase());
+        item2 = item2.replace("_", "");
+      }
+      params.append(item2, userData[item]);
+    }
+  }
+  axios.put(('/api/users/' + localStorage.getItem('id')), params)
+  .catch(handleGetError)
+  .then(handleUpdateUser)
+  .catch(handleGetError);
+}
+
+function handleUpdateUser(response) {
+  let outputDiv = document.createElement("div");
+  if (response.data && 'result' in response.data) {
+     let html = "<p class=\"lead text-center\">";
+     if (response.data['result'] == "Success!") {
+       html += "Your data was edited successfully.</p>";
+       outputDiv.className = "alert alert-success p-4 mt-3";
+       outputDiv.innerHTML = html;
+       for (let item in userData) {
+         let field;
+       }
+     }
+     else {
+       html += "Something went wrong. " + ('reason' in response.data ? ('Reason: ' + response.data['reason']) : '' ) + "</p>";
+       outputDiv.className = "alert alert-danger p-4 mt-3";
+       outputDiv.innerHTML = html;
+     }
+  }
+  else {
+    html += "Something went wrong, update has failed..</p>";
+    outputDiv.className = "alert alert-danger p-4 mt-3";
+    outputDiv.innerHTML = html;
+  }
+  userContent.appendChild(outputDiv);
+  isLoaded = true;
 }
 
 main();
