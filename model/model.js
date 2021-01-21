@@ -196,7 +196,6 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
     }
     
     sqlSet += `WHERE id = '${id}';`;
-    console.log(sqlSet);
     return sqlSet;
 }
 
