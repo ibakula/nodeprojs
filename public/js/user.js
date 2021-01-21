@@ -66,9 +66,8 @@ function LoadFormData() {
   userContent.style = "border:0px;";
 
   for (let item in userData) {
-    if ((userData[item] == null &&
-        item != 'password') ||
-        userData[item].length < 1) {
+    if ((userData[item] == null ||
+        userData[item].length < 1) && item != 'password') {
       continue;
     }
     let formNameStr = item;
@@ -109,6 +108,9 @@ function LoadFormData() {
 }
 
 function handleSaveUserChanges(e) {
+  e.preventDefault();
+  let params = new URLSearchParams();
+  axios.post('');
 }
 
 main();
