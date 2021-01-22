@@ -99,9 +99,6 @@ function handleAddCategoryRelatedArticle(response, categoryId, categoryTitle) {
       oldContentIsWiped = true;
     }
     AddCategoryRelatedArticle(response.data, categoryId, categoryTitle);
-    if (categoryId == 1) {
-      isLoaded = true;
-    }
   }
 }
 
@@ -114,6 +111,7 @@ function handleListPostsByCategoryId(response, categoryId, categoryTitle) {
   }
 
   lastPostId = (response.data.id+1);
+  let promises = [];
   let n = 0;
   for (let i = response.data.id;
        i < lastPostId && i > 0;
@@ -122,11 +120,12 @@ function handleListPostsByCategoryId(response, categoryId, categoryTitle) {
       lastPostId = (i+1);
       break;
     }
-    axios.get(('/api/posts/'+i))
+    promises.push(axios.get(('/api/posts/'+i))
     .catch(handleError)
-    .then(response => { handleAddCategoryRelatedArticle(response, categoryId, categoryTitle); })
-    .catch(handleError);
+    .then(res => { handleAddCategoryRelatedArticle(res, categoryId, categoryTitle); })
+    .catch(handleError));
   }
+  Promise.allSettled(promises).then(() => { isLoaded = true; });
 }
 
 function handleGetCategory(response) {
