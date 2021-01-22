@@ -204,6 +204,14 @@ function handleGetUserById(response) {
     userContent.appendChild(document.createElement("hr"));
     userContent.lastElementChild.className = "my-4";
   }
+  else {
+    userContent.lastElementChild.innerText = "No user found";
+    userContent.appendChild(document.createElement("p"));
+    userContent.lastElementChild.className = "lead";
+    userContent.lastElementChild.innerText = "The user might not be a member anymore or this user simply does not exist.";
+    userContent.appendChild(document.createElement("hr"));
+    userContent.lastElementChild.className = "my-4";
+  }
 }
 
 function determinateRank(permissions) {
