@@ -113,6 +113,7 @@ function handleGetComments(response) {
   if (response.data == null || 
     !Array.isArray(response.data) || 
     response.data.length < 1) {
+    isLoaded = true;
     return;
   }
   
@@ -122,6 +123,7 @@ function handleGetComments(response) {
     .then(res => { handleGetUser(res, item.text, item.date); })
     .catch(handleGetError);
   }
+  isLoaded = true;
 }
 
 function handleGetUser(res, text, commentDate) {
