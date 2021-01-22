@@ -214,7 +214,7 @@ function addRecommendedArticle(articleData) {
   if (skimmed.img.length > 0) {
     html += skimmed.img;
   }
-  html += `<p class="text-muted lead">` + date.getDate() + "." + (date.getMonth()+1)  + `</p><p class="card-text lead">${skimmed.text}</p></article>`;
+  html += `<p class="text-muted lead">` + date.getDate() + "." + (date.getMonth()+1)  + `.</p><p class="card-text lead">${skimmed.text}</p></article>`;
   sectionElements['recommendation'].innerHTML = sectionElements['recommendation'].innerHTML + html;
 }
 
