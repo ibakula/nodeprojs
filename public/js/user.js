@@ -32,13 +32,6 @@ function LoadUserOwnData() {
   }
   
   userElementHeader.lastElementChild.firstElementChild.innerText = localStorage.getItem("first_name") + " " + localStorage.getItem("last_name");
-
-  const length = userContent.children.length;
-  for (let i = 0; 
-    i < length; 
-    ++i) {
-    userContent.children[0].remove();
-  }
   
   userData.first_name = localStorage.getItem("first_name");
   userData.last_name = localStorage.getItem("last_name");
@@ -60,6 +53,7 @@ function fetchRestUserData(response) {
 }
 
 function LoadFormData() {
+  removeLoadingDummies();
   userContent.appendChild(document.createElement("form"));
   userContent.lastElementChild.className = "ml-4";
   userContent.lastElementChild.id = "user_form";
@@ -108,26 +102,49 @@ function LoadFormData() {
   isLoaded = true;
 }
 
+function removeLoadingDummies() {
+  const length = userContent.children.length;
+  for (let i = 0;
+    i < length;
+    ++i) {
+    userContent.children[0].remove();
+  }
+}
+
 function handleSaveUserChanges(e) {
   e.preventDefault();
   isLoaded = false;
   let params = new URLSearchParams();
   userData['password'] = userContent.querySelector("#user_password").value;
+  let fieldInputDiff = 0;
   for (let item in userData) {
     if (item.search("date") > -1 || item == 'permissions') {
       continue;
     }
     let field = userContent.querySelector(("#user_"+item));
     if (userData[item] != field.value || (item == 'password' && 'password' in userData && userData[item].length > 5)) {
+      fieldInputDiff += 1;
       let _Pos = item.search("_");
       let item2 = item;
       if (_Pos > -1) {
         item2 = item2.replace(item2.charAt((_Pos+1)), item2.charAt((_Pos+1)).toUpperCase());
         item2 = item2.replace("_", "");
       }
+      userData[item] = field.value;
       params.append(item2, userData[item]);
     }
   }
+
+  if (fieldInputDiff == 0) {
+    let outputDiv = document.createElement("div");
+    let html = "<p class=\"lead text-center\">No changes were made to your profile.</p>";
+    outputDiv.className = "alert alert-info p-4 mt-3";
+    outputDiv.innerHTML = html;
+    userContent.appendChild(outputDiv);
+    isLoaded = true;
+    return;
+  }
+
   axios.put(('/api/users/' + localStorage.getItem('id')), params)
   .catch(handleGetError)
   .then(handleUpdateUser)
@@ -143,7 +160,11 @@ function handleUpdateUser(response) {
        outputDiv.className = "alert alert-success p-4 mt-3";
        outputDiv.innerHTML = html;
        for (let item in userData) {
-         let field;
+         if (item == 'password' || 
+           (item.search("date") > -1)) {
+           continue;
+         }
+         localStorage.setItem(item, userData[item]);
        }
      }
      else {
@@ -159,6 +180,43 @@ function handleUpdateUser(response) {
   }
   userContent.appendChild(outputDiv);
   isLoaded = true;
+}
+
+function handleGetUserById(response) {
+  if (localStorage.getItem('first_name') == null) {
+    userElementHeader.style = "display:none;";
+  }
+  else {
+    userElementHeader.lastElementChild.firstElementChild.innerText = localStorage.getItem("first_name") + " " + localStorage.getItem("last_name");
+  }
+  removeLoadingDummies();
+  userContent.parentElement.className = "mb-0";
+  userContent.parentElement.nextElementSibling.className = userContent.parentElement.nextElementSibling.className.replace("mt-5", "");
+  userContent.className = "jumbotron mb-0";
+  userContent.appendChild(document.createElement("h1"));
+  userContent.lastElementChild.className = "display-4";
+  if (response.data && 'first_name' in response.data) {
+    userContent.lastElementChild.innerText = response.data['first_name'] + " " + response.data['last_name'];
+    userContent.appendChild(document.createElement("p"));
+    userContent.lastElementChild.className = "lead";
+    let date = new Date(parseInt(response.data['signup_date']));
+    userContent.lastElementChild.innerText = determinateRank(response.data['permissions']) + " and a member since " + (date.getMonth()+1) + "/" + date.getFullYear();
+    userContent.appendChild(document.createElement("hr"));
+    userContent.lastElementChild.className = "my-4";
+  }
+}
+
+function determinateRank(permissions) {
+  if (permissions == 1) {
+    return "Author";
+  }
+  if (permissions == 2) {
+    return "Moderator";
+  }
+  if (permissions == 3) {
+    return "Administrator";
+  }
+  return "Regular user";
 }
 
 main();
