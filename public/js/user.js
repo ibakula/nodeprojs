@@ -10,6 +10,7 @@ let userData = {
 }
 
 function main() {
+  loadUI();
   if (!params.has('id')) {
     LoadUserOwnData();
     return;
@@ -19,6 +20,26 @@ function main() {
   .catch(handleGetError)
   .then(handleGetUserById)
   .catch(handleGetError);
+}
+
+function loadUI() {
+  if (localStorage.getItem("id") === null || localStorage.getItem("permissions") == null) {
+    return;
+  }
+
+  document.getElementById("top").firstElementChild.firstElementChild.children[1].remove();
+  let logoutBtn = document.createElement("li");
+  logoutBtn.className = "col-sm";
+  logoutBtn.appendChild(document.createElement("ul"));
+  logoutBtn.firstChild.className = "navbar-nav justify-content-sm-end";
+  logoutBtn.firstChild.appendChild(document.createElement("li"));
+  logoutBtn.firstChild.firstChild.className = "nav-item";
+  logoutBtn.firstChild.firstChild.appendChild(document.createElement("a"));
+  logoutBtn.firstChild.firstChild.firstChild.className = "nav-link";
+  logoutBtn.firstChild.firstChild.firstChild.setAttribute("href", "logout.html");
+  logoutBtn.firstChild.firstChild.firstChild.innerText = "Logout";
+  let list = document.getElementById("top").firstElementChild.firstElementChild;
+  list.insertBefore(logoutBtn, list.lastElementChild);
 }
 
 function handleGetError(error) {
