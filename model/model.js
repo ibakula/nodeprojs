@@ -76,9 +76,9 @@ function separateTermsForSqlQuery(term, table) {
         item2 = item2.replace("Name", "_name");
       }
       term2 = term2.slice(nextPos+1, term2.length);
-      sql += `${item2} LIKE '%${word}%' AND `;
+      sql += `${item2} LIKE '%${word}%' ` + (table == 'users' ? 'OR ' : 'AND ');
     } while (nextPos != -1);   
-    sql = sql.slice(0, (sql.length-5));
+    sql = sql.slice(0, (sql.length-(table == 'users' ? 4 : 5)));
     sql += ' OR ';
   }
   sql = sql.slice(0, (sql.length-4));
