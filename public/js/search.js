@@ -31,7 +31,8 @@ function handleSearchBtnClick(e) {
   searchElement.className = "container-fluid col-sm mb-5 p-3";
   searchElement.lastElementChild.appendChild(document.createElement("p"));
   searchElement.lastElementChild.lastElementChild.className = "lead";
-  searchElement.lastElementChild.lastElementChild.innerHTML = `Search results based on your inquiry, please <a href="${location.pathname}">reload page<a> to go back!:`;
+  let path = location.pathname + location.search;
+  searchElement.lastElementChild.lastElementChild.innerHTML = `Search results based on your inquiry, please <a href="${path}">reload page<a> to go back!:`;
   let dummyLoadingBarHtml = '<div class="mb-4 ml-2" style="background-color:#eeeeee;width:280px;height:3.5ex;"></div><div class="mb-3 ml-2" style="background-color:#eeeeee;width:480px;height:3.5ex;"></div><div class="mb-4 ml-2" style="background-color:#eeeeee;width:480px;height:3.5ex;"></div><div class="mb-4 ml-2" style="background-color:#eeeeee;width:180px;height:3.5ex;"></div>';
   searchElement.innerHTML = searchElement.innerHTML + dummyLoadingBarHtml;
   siteContainer.insertBefore(searchElement, siteContainer.children[1]);
