@@ -140,32 +140,15 @@ function handleGetUser(res, text, commentDate) {
 }
 
 function handleGetArticlesFromEnd(response) {
-  if (!response.data || !('id' in response.data)) {
-    return;
-  }
-
-  let title = sectionElements['articleSection'].children[sectionElements['articleSection'].children.length-2].innerText;
-  let keywords = [];
-  let l = 0;
-  for (let i = 0; i < title.length; ++i) {
-    if (title[i] == ' ') {
-      ++l;
-      continue;
-    }
-    if (keywords[l] === undefined) {
-      keywords[l] = '';
-    }
-    keywords[l] += title[i];
-  }
-
-  if (keywords.length < 1) {
-    // If no keywords then dont search
-    // ToDo: add page content for no similar posts match
-    return;
-  }
-
   removeAllContent('recommendation');
-
+  if (!response.data || !('id' in response.data)) {
+    sectionElements['recommendation'].appendChild(document.createElement("p"));
+    sectionElements['recommendation'].lastElementChild.className = "lead";
+    sectionElements['recommendation'].lastElementChild.innerText = "Sorry, could not find any content.. ";
+    return;
+  }
+  
+  let promises = [];
   for (let i = response.data.id;
     i < (response.data.id+1) && i > 0 ;
     --i) {
@@ -183,27 +166,27 @@ function handleGetArticlesFromEnd(response) {
       loadedPostCount['recommendation'] = 0;
       break;
     }
-    axios.get(('/api/posts/'+i))
+    promises.push(axios.get(('/api/posts/'+i))
     .catch(handleGetError)
-    .then(res => { handleGetArticleAndFindSimilarTopics(res, keywords); })
-    .catch(handleGetError);
+    .then(res => { handleGetArticleAndFindSimilarTopics(res, response.data['category_id']); })
+    .catch(handleGetError));
   }
+  Promise.all(promises).then(() => {
+    if (sectionElements['recommendation'].getElementsByTagName("article").length < 1) {
+      sectionElements['recommendation'].appendChild(document.createElement("p"));
+      sectionElements['recommendation'].lastElementChild.className = "lead";
+      sectionElements['recommendation'].lastElementChild.innerText = "Sorry, could not find any content.. ";
+    }
+  });
 }
 
-function handleGetArticleAndFindSimilarTopics(response, keywords) {
+function handleGetArticleAndFindSimilarTopics(response, categoryId) {
   if (!response.data || !('id' in response.data)) {
     return;
   }
-  let keywordPoints = 0;
-  for (let i = 0;
-    i < keywords.length;
-    ++i) {
-    if ((response.data.text.search(keywords[i]) > -1) || (response.data.title.search(keywords[i]) > -1)) {
-      ++keywordPoints;
-      if (keywordPoints > 1) {
-        addRecommendedArticle(response.data);
-      }
-    }
+
+  if (response.data['category_id'] == categoryId)  {
+    addRecommendedArticle(response.data);
   }
 }
 
@@ -215,10 +198,8 @@ function addRecommendedArticle(articleData) {
     html += skimmed.img;
   }
   html += `<p class="text-muted lead">` + date.getDate() + "." + (date.getMonth()+1)  + `.</p><p class="card-text lead">${skimmed.text}</p></article>`;
-  sectionElements['recommendation'].innerHTML = sectionElements['recommendation'].innerHTML + html;
+  sectionElements['recommendation'].innerHTML += html;
 }
-
-
 
 function handleGetPopularArticles(response, type) {
   if (!response.data || !Array.isArray(response.data) || response.data.length < 1) {
