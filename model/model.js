@@ -531,7 +531,7 @@ const model = {
                     return;
                 }
                 else {
-                    let date = Date().now();
+                    let date = Date.now();
                     req.session.userId = row['id'];
                     req.session.permissions = row['permissions'];
                     req.session.email = req.body.email;
