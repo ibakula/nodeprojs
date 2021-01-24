@@ -131,7 +131,7 @@ function postOutput(response, formName, formIndex) {
     }
     else {
       output_div.className = "alert alert-danger p-4 mt-3";
-      output_div.innerHTML = "<p>Error: Something seems to went wrong with the input.</p>";
+      output_div.innerHTML = "<p>Error: Wrong user/password combination.</p>";
     }
   }
   else {
