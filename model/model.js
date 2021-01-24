@@ -544,7 +544,7 @@ const model = {
                             console.error(err.message);
                         }
                     });
-                    db.run(`UPDATE users SET login_date = ${date} WHERE id = ${row.id);`, err => {
+                    db.run(`UPDATE users SET login_date = '${date}' WHERE id = '${row.id}';`, err => {
                       if (err) {
                         console.error("User login: could not save login date");
                         console.error(err.message);
