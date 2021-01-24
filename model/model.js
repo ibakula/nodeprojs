@@ -1,6 +1,7 @@
 const sqlite = require('sqlite3').verbose();
 const errorHandler = require('./errorHandler');
 const db = new sqlite.Database('./database/news.db', errorHandler.handleDbOpen);
+const md5 = require('md5');
 
 const usersStruct = {
     'id' : 'number',
@@ -150,8 +151,9 @@ function createInsertStatmentBasedOnTableName(table, params) {
             sql += `(title, img) VALUES('${params.title}', '${params.img}');`;
             break;
         case `users`:
+            let password = md5(params.password);
             sql += `(first_name, last_name, password, email, signup_date, login_date)
-            VALUES ('${params.firstName}', '${params.lastName}', '${params.password}', '${params.email}', '${now}', '0');`;
+            VALUES ('${params.firstName}', '${params.lastName}', '${password}', '${params.email}', '${now}', '0');`;
             break;
         case 'comments':
             sql += `(post_id, user_id, text, date, last_edit) VALUES ('${params.postId}', '${params.userId}', '${params.text}', '${now}', '0');`;
@@ -178,9 +180,10 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             ('date' in params ? `date = '${params.date}' ` : "");
             break;
         case `users`:
+            let password = md5(params.password);
             sqlSet += ('firstName' in params ? `first_name = '${params.firstName}', ` : '') +
             ('lastName' in params ? `last_name = '${params.lastName}', ` : '') +
-            ('password' in params ? `password = '${params.password}', ` : '') +
+            ('password' in params ? `password = '${password}', ` : '') +
             ('email' in params ? `email = '${params.email}', ` : '') +
             ('signupDate' in params ? `signup_date = '${params.signupDate}', ` : '') +
             ('loginDate' in params ? `login_date = '${params.loginDate}' ` : '');
@@ -522,7 +525,8 @@ const model = {
                 console.error(err.message);
             }
             else {
-                if (row == undefined || row['password'] != req.body['password']) {
+                let password = md5(req.body['password']);
+                if (row == undefined || row['password'] != password) {
                     next(req, res, { 'result' : 'Failed!', 'reason' : 'Invalid email/password' }, null);
                     return;
                 }
