@@ -340,8 +340,8 @@ const model = {
             'reason':'input compliance fallthrough'}, null);
             return;
         }
-        
-        db.all(`SELECT * FROM ${table} WHERE id = ${next.request.params.id};`, (err, rows) => {
+        let columns = (table == 'users' ? 'id, first_name, last_name, email, permissions, signup_date' : '*');
+        db.all(`SELECT ${columns} FROM ${table} WHERE id = ${next.request.params.id};`, (err, rows) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, {}, null);
                 console.error(`${table}: Could not complete SELECT operation!`);
@@ -531,17 +531,24 @@ const model = {
                     return;
                 }
                 else {
+                    let date = Date().now();
                     req.session.userId = row['id'];
                     req.session.permissions = row['permissions'];
                     req.session.email = req.body.email;
                     req.session.firstName = row['first_name']
                     req.session.lastName = row['last_name'];
-                    req.session.lastLogin = row['login_date'];
+                    req.session.lastLogin = date;
                     req.session.save(err => {
                         if (err) {
                             console.error("Couldnt save session on userLogin!");
                             console.error(err.message);
                         }
+                    });
+                    db.run(`UPDATE users SET login_date = ${date} WHERE id = ${row.id);`, err => {
+                      if (err) {
+                        console.error("User login: could not save login date");
+                        console.error(err.message);
+                      }
                     });
                 }
             }
