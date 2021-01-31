@@ -1,0 +1,158 @@
+const sqlite = require('sqlite').verbose();
+
+class Database {
+  constructor(name) {
+    this.db = new sqlite.Database(name, handleOpenDb);
+    this.error = null;
+  }
+  
+  handleOpenDb(error) {
+    if (error != null) {
+      console.log("Database opened successfully!");
+    }
+    else {
+      console.error("DB Error: could not open the database.");
+      console.error(error.message);
+      this.error = error;
+    }
+  }
+  
+  // params: Array, matches: Object, table: String
+  select(params, matches, table) {
+    let sql = "SELECT ";
+    if (Array.isArray(params)) {
+      for (const i of params) {
+        sql += `${i} ,`;
+      }
+      sql = sql.slice(0, sql.length-1);
+    }
+    else {
+      sql += '* ';
+    }
+    sql += `FROM ${table} `;
+    if (matches != null && matches != undefined) {
+      sql += "WHERE ";
+      for (const item in matches) {
+        sql += `${item} = '${matches.item}', `;
+      }
+      sql = sql.slice(0, sql.length-2);
+      sql += ";";
+    }
+    let database = this.db;
+    let dbErr = this.error;
+    let promise = new Promise((resolve, reject) => {
+      if (dbErr != null) {
+        reject(dbErr);
+      }
+      else {
+        database.all(sql, (err, rows) => {
+        if (err != null) {
+          reject(err);
+        }
+        else {
+          resolve(rows);
+        }
+      }
+    });
+
+    return promise;
+  }
+  
+  // params: Object
+  insert(params) {
+    let sql = `INSERT INTO ${params.table} (`;
+    let val = "VALUES (";
+    for (const i in params) {
+      if (i == 'table') {
+        continue;
+      }
+      sql += `${i}, `;
+      val += `${params.i}, `;
+    }
+    sql = sql.slice(0, sql.length-2);
+    val = val.slice(0, val.length-2);
+    sql += val + ');';
+    let database = this.db;
+    let dbErr = this.error;
+    let promise = new Promise((resolve, reject) => {
+      if (dbErr != null) {
+        reject(dbErr);
+      }
+      else {
+        database.run(sql, (err) => {
+          if (err != null) {
+            reject(err);
+          }
+          else {
+            resolve();
+          }
+        });
+      }
+    });
+    
+    return promise;
+  }
+  
+  // params: Object, matches: Object
+  update(params, matches) {
+    let sql = `UPDATE ${params.table} SET `;
+    for (const i in params) {
+      sql += `${i} = '${params.i}', `;
+    }
+    sql = sql.slice(0, sql.length-2);
+    sql += " WHERE ";
+    for (const i in matches) {
+      sql += `${i} = ${matches.i}, `;
+    }
+    sql = sql.slice(0, sql.length-2);
+    sql += ';';
+    database = this.db;
+    dbErr = this.error;
+    let promise = new Promise((resolve, reject) => {
+      if (dbErr != null) {
+        reject(dbErr);
+      }
+      else {
+        database.run(sql, (err) => {
+          if (err != null) {
+            reject(err);
+          }
+          else {
+            resolve();
+          }
+        });
+      }
+    });
+
+    return promise;
+  }
+  
+  // params: Object
+  remove(params) {
+    let sql = `DELETE FROM {params.table}`;
+    for (const i in params) {
+      sql += ` WHERE ${i} = ${params.i} AND `;
+    }
+    sql = sql.slice(0, sql.length-5);
+    sql += ';';
+    let database = this.db;
+    let dbErr = this.error;
+    let promise = new Promise((resolve, reject) => {
+      if (dbError != null) {
+        reject(dbErr);
+      }
+      else {
+        database.run(sql, (err) => {
+          if (err != null) {
+            reject(err);
+          }
+          else {
+            resolve();
+          }
+        });
+      }
+    });
+    
+    return promise;
+  }
+}
