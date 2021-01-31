@@ -60,7 +60,7 @@ class Database {
       sql = sql.slice(0, sql.length-2);
     }
     sql += ";";
-    console.log(sql);
+    
     return this.executeDeferredQuery('all', sql);
   }
   
