@@ -1,14 +1,16 @@
-const sqlite = require('sqlite').verbose();
+const sqlite = require('sqlite3').verbose();
 
 class Database {
   constructor(name) {
-    this.db = new sqlite.Database(name, handleOpenDb);
+    this.isOpen = false;
+    this.db = new sqlite.Database(name, this.handleOpenDb);
     this.error = null;
   }
   
   handleOpenDb(error) {
-    if (error != null) {
+    if (error == null) {
       console.log("Database opened successfully!");
+      this.isOpen = true;
     }
     else {
       console.error("DB Error: could not open the database.");
@@ -25,12 +27,13 @@ class Database {
       }
       else {
         task(sql, (err, rows) => {
-        if (err != null) {
-          reject(err);
-        }
-        else {
-          rows != undefined ? resolve(rows) : resolve();
-        }
+          if (err != null) {
+            reject(err);
+          }
+          else {
+            rows != undefined ? resolve(rows) : resolve();
+          }
+        });
       }
     });
     
@@ -59,7 +62,7 @@ class Database {
       sql += ";";
     }
     
-    return executeDeferredQuery(this.db.all, sql);
+    return this.executeDeferredQuery(this.db.all, sql);
   }
   
   // params: Object
@@ -77,7 +80,7 @@ class Database {
     val = val.slice(0, val.length-2);
     sql += val + ');';
     
-    return executeDeferredQuery(this.db.run, sql);
+    return this.executeDeferredQuery(this.db.run, sql);
   }
   
   // params: Object, matches: Object
@@ -94,7 +97,7 @@ class Database {
     sql = sql.slice(0, sql.length-2);
     sql += ';';
 
-    return executeDeferredQuery(this.db.run, sql);
+    return this.executeDeferredQuery(this.db.run, sql);
   }
   
   // params: Object
@@ -106,6 +109,8 @@ class Database {
     sql = sql.slice(0, sql.length-5);
     sql += ';';
     
-    return executeDeferredQuery(this.db.run, sql);
+    return this.executeDeferredQuery(this.db.run, sql);
   }
 }
+
+module.exports = Database;
