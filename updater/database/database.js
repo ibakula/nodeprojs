@@ -17,6 +17,26 @@ class Database {
     }
   }
   
+  executeDeferredQuery(task, sql) {
+    let dbErr = this.error;
+    let promise = new Promise((resolve, reject) => {
+      if (dbErr != null) {
+        reject(dbErr);
+      }
+      else {
+        task(sql, (err, rows) => {
+        if (err != null) {
+          reject(err);
+        }
+        else {
+          rows != undefined ? resolve(rows) : resolve();
+        }
+      }
+    });
+    
+    return promise;
+  }
+
   // params: Array, matches: Object, table: String
   select(params, matches, table) {
     let sql = "SELECT ";
@@ -38,24 +58,8 @@ class Database {
       sql = sql.slice(0, sql.length-2);
       sql += ";";
     }
-    let database = this.db;
-    let dbErr = this.error;
-    let promise = new Promise((resolve, reject) => {
-      if (dbErr != null) {
-        reject(dbErr);
-      }
-      else {
-        database.all(sql, (err, rows) => {
-        if (err != null) {
-          reject(err);
-        }
-        else {
-          resolve(rows);
-        }
-      }
-    });
-
-    return promise;
+    
+    return executeDeferredQuery(this.db.all, sql);
   }
   
   // params: Object
@@ -72,25 +76,8 @@ class Database {
     sql = sql.slice(0, sql.length-2);
     val = val.slice(0, val.length-2);
     sql += val + ');';
-    let database = this.db;
-    let dbErr = this.error;
-    let promise = new Promise((resolve, reject) => {
-      if (dbErr != null) {
-        reject(dbErr);
-      }
-      else {
-        database.run(sql, (err) => {
-          if (err != null) {
-            reject(err);
-          }
-          else {
-            resolve();
-          }
-        });
-      }
-    });
     
-    return promise;
+    return executeDeferredQuery(this.db.run, sql);
   }
   
   // params: Object, matches: Object
@@ -106,25 +93,8 @@ class Database {
     }
     sql = sql.slice(0, sql.length-2);
     sql += ';';
-    database = this.db;
-    dbErr = this.error;
-    let promise = new Promise((resolve, reject) => {
-      if (dbErr != null) {
-        reject(dbErr);
-      }
-      else {
-        database.run(sql, (err) => {
-          if (err != null) {
-            reject(err);
-          }
-          else {
-            resolve();
-          }
-        });
-      }
-    });
 
-    return promise;
+    return executeDeferredQuery(this.db.run, sql);
   }
   
   // params: Object
@@ -135,24 +105,7 @@ class Database {
     }
     sql = sql.slice(0, sql.length-5);
     sql += ';';
-    let database = this.db;
-    let dbErr = this.error;
-    let promise = new Promise((resolve, reject) => {
-      if (dbError != null) {
-        reject(dbErr);
-      }
-      else {
-        database.run(sql, (err) => {
-          if (err != null) {
-            reject(err);
-          }
-          else {
-            resolve();
-          }
-        });
-      }
-    });
     
-    return promise;
+    return executeDeferredQuery(this.db.run, sql);
   }
 }
