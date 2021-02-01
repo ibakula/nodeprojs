@@ -14,6 +14,11 @@ section#content main,  section#content > section {
     }
 }
 
+#content.container-fluid article, #content aside article {
+  max-height:250px;
+}
+
+
 section#content main article, section#content > section article {
     overflow-wrap:anywhere;
     hyphens:auto;
