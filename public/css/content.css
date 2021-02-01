@@ -14,8 +14,12 @@ section#content main,  section#content > section {
     }
 }
 
-#content.container-fluid article, #content aside article {
-  max-height:250px;
+#content.container-fluid article {
+  max-height:50.6ex;
+}
+
+#content aside article {
+  max-height:35.6ex;
 }
 
 

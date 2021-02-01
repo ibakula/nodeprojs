@@ -57,3 +57,8 @@ input[type="text"]:focus, input[type="password"]:focus, input[type="email"]:focu
 input[type="text"]:invalid, input[type="password"]:invalid, input[type="email"]:invalid, textarea:invalid {
     border-color:#ffa1a1;
 }
+
+#content > article {
+  max-height:50.4ex;
+  overflow:hidden;
+}
