@@ -24,6 +24,11 @@ class Database {
       if (this.error != null) {
         reject(dbErr);
       }
+      else if (!this.isOpen) {
+        setTimeout(() => {
+          executeDeferredQuery(task, sql);
+        }, 5000);
+      }
       else {
         this.db[task](sql, (err, rows) => {
           if (err != null) {
