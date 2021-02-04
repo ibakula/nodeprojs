@@ -1,8 +1,8 @@
 const jsdom = require('jsdom');
 
 class Model {
-  constructor(html) {
-    this.dom = new jsdom.JSDOM(html);
+  constructor(html, address) {
+    this.dom = new jsdom.JSDOM(html, { url: address, contentType: "text/html" });
   }
 }
 
