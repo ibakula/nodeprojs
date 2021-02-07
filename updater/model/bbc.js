@@ -25,13 +25,19 @@ class BbcLatestSectionModel extends Model {
     let latest = this.dom.window.document.body.querySelector("#site-container div:nth-child(3) ol");
     let now = new Date(Date.now());
     let date = now.getDate() + " " +  this.monthNames[now.getMonth()];
+    let firstChild = false;
     for (let i = 0; i < latest.children.length; ++i) {
       if (latest.children[i].tagName == "LI") {
+        if (firstChild == false) {
+          firstChild = i;
+        }
         let postIdStr = latest.children[i].firstElementChild.getElementsByTagName("a")[0].getAttribute("href");
-        if (postIdStr != null && postIdStr.search(this.sectionName) > -1) {
+        if (postIdStr != null /*&& postIdStr.search(this.sectionName) > -1*/) {
           let time = latest.children[i].querySelector("time span:last-child").innerHTML;
-          if (time.length > 5 && time.search(date) == -1 && (this.lastPostTime != null && this.lastPostTime == time)) {
-            continue;
+          if ((this.lastPostTime != null && this.lastPostTime.search(time) > -1) ||
+              (time.length > 5 && time.search(date) == -1)) {
+            this.lastPostTime = latest.children[firstChild].querySelector("time span:last-child").innerHTML;
+            break;
           }
           yield { postIdStr, time };
         }
@@ -42,7 +48,7 @@ class BbcLatestSectionModel extends Model {
   get linksFullArticle() {
     let links = [];
     for (let item of this.newsAddressListTodayIterator()) {
-      links.push(item.postIdStr);
+      links.push(item);
     }
     return links;
   }
