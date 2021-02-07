@@ -59,7 +59,7 @@ function splitData(data) {
       if (imgTag.length > 0) {
         skimmedData.img = imgTag;
       }
-      skimmedData.text = data.slice(endPos);
+      skimmedData.text = data.slice(endPos+1);
     }
     else {
       skimmedData.text = data;

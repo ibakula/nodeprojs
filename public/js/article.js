@@ -343,7 +343,7 @@ function skimData(text) {
   if (imgPos > -1) {
     let imgEndPos = text.search(">");
     if (imgEndPos > -1) {
-      skimmed.text = text.slice(imgPosEnd);
+      skimmed.text = text.slice(imgPosEnd+1);
       skimmed.img = text.slice(imgPos, (imgPosEnd+1));
     }
   }
