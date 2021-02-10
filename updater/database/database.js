@@ -1,31 +1,67 @@
 const sqlite = require('sqlite3').verbose();
 
-class Database {
-  constructor(name) {
-    this.isOpen = false;
-    this.db = new sqlite.Database(name, this.handleOpenDb);
-    this.error = null;
-  }
-  
-  handleOpenDb(error) {
+function databaseTemplateFn() {
+  let db = null;
+  let isOpen = false;
+  let error = null;
+
+  // End result: resolve(), reject(error)
+  function handleOpen(err, resolve, reject) {
     if (error == null) {
       console.log("Database opened successfully!");
-      this.isOpen = true;
+      isOpen = true;
+      error != null ? error = null : 0; // Reset in case reopen occurs
+      resolve();
     }
     else {
       console.error("DB Error: could not open the database.");
       console.error(error.message);
-      this.error = error;
+      err = error; // "write down" the error
+      isOpen ? isOpen = false : 0;
+      reject(err);
     }
   }
-  
+
+  return {
+    open(dbPath) {
+      return new Promise((resolve, reject) => {
+        db = new sqlite.Database(dbPath, error => {
+          handleOpen(error, resolve, reject);
+        });
+      });
+    },
+    get isOpen() {
+      return isOpen;
+    },
+    get error() {
+      return error;
+    },
+    perform(task, sql, next) {
+      this.db[task](sql, (err, rows) => {
+        if (err != null) {
+          error = err;
+          next(err);
+        }
+        else {
+          next(null, rows);
+        }
+      });
+    }
+  };
+}
+
+class Database {
+  constructor() {
+    this.db = databaseTemplateFn();
+  }
+
   executeDeferredQuery(task, sql) {
-    let promise = new Promise((resolve, reject) => {
-      if (this.error != null) {
+    return new Promise((resolve, reject) => {
+      if (this.db.error != null) {
         reject(dbErr);
       }
       else {
-        this.db[task](sql, (err, rows) => {
+        this.db.perform(task, sql, (err, rows) => {
           if (err != null) {
             reject(err);
           }
@@ -35,8 +71,6 @@ class Database {
         });
       }
     });
-    
-    return promise;
   }
 
   // params: Array, matches: Object, table: String
@@ -110,6 +144,10 @@ class Database {
     sql += ';';
     
     return this.executeDeferredQuery('run', sql);
+  }
+  
+  open(databasePath) {
+    return this.db.open(databasePath);
   }
 }
 
