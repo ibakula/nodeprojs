@@ -3,7 +3,7 @@ const QueryString = require('querystring');
 
 class Controller {
   constructor(databasePath) {
-    this.db = new Database(databasePath);
+    this.db = new Database();
     this.userData = {};
     this.httpConf = { 
       withCredentials: true
@@ -32,14 +32,21 @@ class Controller {
     }
   }
   
-  init() { 
-    return this.db.select('*', null, 'user')
-    .then(rows => {
-      this.userData = rows[0];
-    })
-    .catch(error => {
-      console.error("DB Selection error: Failed to fetch user data");
-      console.error(error.message);
+  init(dbFilePath) { 
+    return new Promise((resolve, reject) => {
+      this.db.open(dbFilePath)
+      .then(() => {
+        this.db.select('*', null, 'user')
+        .then(rows => {
+          this.userData = rows[0];
+          resolve();
+        })
+        .catch(error => {
+          console.error("DB Selection error: Failed to fetch user data");
+          console.error(error.message);
+          reject();
+        })
+      })
     });
   }
 }
