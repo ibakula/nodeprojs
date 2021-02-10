@@ -37,7 +37,7 @@ function databaseTemplateFn() {
       return error;
     },
     perform(task, sql, next) {
-      this.db[task](sql, (err, rows) => {
+      db[task](sql, (err, rows) => {
         if (err != null) {
           error = err;
           next(err);
