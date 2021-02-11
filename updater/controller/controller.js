@@ -23,7 +23,7 @@ class Controller {
         axios.get('/api/user/status', { headers: this.httpConf.headers })
         .then(response => {
           this.onRefreshStatus(response, resolve, reject);
-        });
+        })
         .catch(error => {
           console.error("User status could not be obtained.");
           console.error(error.message);
