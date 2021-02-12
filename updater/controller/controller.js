@@ -11,14 +11,25 @@ class Controller {
   }
   
   onRefreshStatus(response, resolve, reject) {
-    // Populate userData
-    // save to DB
+    if (!('data' in response)) {
+      console.error("Failed to check session status.");
+      reject(new Error("Absolutely no data was returned by the server."));
+      return;
+    }
+    if (!('id' in response.data)) {
+      console.error("Looks like session has possibly expired.");
+      reject(new Error("Session probably expired."))
+      return;
+    }
+    Object.assign(this.userData, response.data);
+    resolve();
   }
   
   onUserLogin(response, resolve, reject) {
     if ('data' in response && 'result' in response.data) {
       if (response.data.result.search('Success!') != -1) {
-        this.userData['cookie_id'] = response.headers['Set-Cookie'];
+        let endPos = response.headers['Set-Cookie'].search(";");
+        this.userData['cookie_id'] = response.headers['Set-Cookie'].slice(response.headers['Set-Cookie'].search("api=")+4, endPos != -1 ? endPos : (response.headers['Set-Cookie'].length - 1));
         this.updateHeaderConf();
         axios.get('/api/user/status', { headers: this.httpConf.headers })
         .then(response => {
@@ -37,13 +48,14 @@ class Controller {
       }
     }
     else {
+      console.error("Could not contact API for log-in.");
       reject(new Error('No proper response was received from the server.'));
     }
   }
   
   updateHeaderConf() {
     this.httpConf.headers = {
-      'Set-Cookie': `${this.userData.cookie_id};`
+      'Set-Cookie': `api=${this.userData.cookie_id};`
     };
   }
   
