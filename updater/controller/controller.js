@@ -75,7 +75,17 @@ class Controller {
       }
       else {
         this.updateHeaderConf();
-        // get login status
+        if (!('cookie_id' in this.userData)) {
+          axios.get('/api/user/status', { headers: this.httpConf.headers })
+          .then(response => {
+            this.onRefreshStatus(response, resolve, reject);
+          })
+          .catch(error => {
+            console.error("User status could not be obtained.");
+            console.error(error.message);
+            reject(error);
+          });
+        }
       }
     });
   }
