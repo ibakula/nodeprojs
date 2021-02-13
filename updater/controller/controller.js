@@ -53,7 +53,7 @@ class Controller {
       else { // else 'Failed!' with a property 'reason'
         console.error("Login failed!");
         console.error(response.data.reason);
-        reject(error);
+        reject(new Error(response.data.reason));
       }
     }
     else {
