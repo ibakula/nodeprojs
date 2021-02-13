@@ -136,9 +136,9 @@ class Database {
   
   // params: Object
   remove(params) {
-    let sql = `DELETE FROM ${params.table}`;
+    let sql = `DELETE FROM ${params.table} WHERE`;
     for (const i in params) {
-      sql += ` WHERE ${i} = ${params.i} AND `;
+      sql += ` ${i} = '${params.i}' AND `;
     }
     sql = sql.slice(0, sql.length-5);
     sql += ';';
