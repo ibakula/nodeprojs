@@ -91,7 +91,7 @@ class Database {
       for (const item in matches) {
         sql += `${item} = `+ "'" + `${matches[item]}` + "' AND ";
       }
-      sql = sql.slice(0, sql.length-4);
+      sql = sql.slice(0, sql.length-5);
     }
     sql += ";";
     
