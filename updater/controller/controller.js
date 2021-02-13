@@ -10,6 +10,12 @@ class Controller {
     };
   }
   
+  saveToDB() {
+    let data = this.userData;
+    data['table'] = 'user';
+    this.db.insert(data);
+  }
+  
   onRefreshStatus(response, resolve, reject) {
     if (!('data' in response)) {
       console.error("Failed to check session status.");
@@ -22,6 +28,9 @@ class Controller {
       return;
     }
     Object.assign(this.userData, response.data);
+    this.userData['user_id'] = response.data['id'];
+    delete this.userData.id;
+    saveToDB();
     resolve();
   }
   
