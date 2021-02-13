@@ -1,10 +1,11 @@
 const Database = require('../database/database.js');
 const QueryString = require('querystring');
+const axios = require('axios');
 
 class Controller {
-  constructor(databasePath) {
+  constructor() {
     this.db = new Database();
-    this.userData = {};
+    this.userData = { };
     this.httpConf = { 
       withCredentials: true
     };
@@ -105,7 +106,9 @@ class Controller {
       .then(() => {
         this.db.select('*', null, 'user')
         .then(rows => {
-          this.userData = rows[0];
+          if (rows.length > 0) {
+            this.userData = rows[0];
+          }
           resolve();
         })
         .catch(error => {
