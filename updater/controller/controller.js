@@ -6,9 +6,14 @@ class Controller {
   constructor() {
     this.db = new Database();
     this.userData = { };
-    this.httpConf = { 
-      withCredentials: true
-    };
+  }
+  
+  deleteFromDB() {
+    let data = { 
+      'cookie_id': this.userData['cookie_id'], 
+      'table': 'user' 
+    }
+    this.db.remove(data);
   }
   
   saveToDB() {
@@ -19,54 +24,52 @@ class Controller {
   
   onRefreshStatus(response, resolve, reject) {
     if (!('data' in response)) {
-      console.error("Failed to check session status.");
       reject(new Error("Absolutely no data was returned by the server."));
       return;
     }
     if (!('id' in response.data)) {
-      console.error("Looks like session has possibly expired.");
+      this.deleteFromDB();
+      this.userData = { };
       reject(new Error("Session probably expired."))
       return;
     }
-    Object.assign(this.userData, response.data);
-    this.userData['user_id'] = response.data['id'];
-    delete this.userData.id;
-    saveToDB();
+    if (!('user_id' in this.userData)) {
+      Object.assign(this.userData, response.data);
+      this.userData['user_id'] = response.data['id'];
+      delete this.userData.id;
+      this.saveToDB();
+    }
     resolve();
   }
   
   onUserLogin(response, resolve, reject) {
     if ('data' in response && 'result' in response.data) {
       if (response.data.result.search('Success!') != -1) {
-        let endPos = response.headers['Set-Cookie'].search(";");
-        this.userData['cookie_id'] = response.headers['Set-Cookie'].slice(response.headers['Set-Cookie'].search("api=")+4, endPos != -1 ? endPos : (response.headers['Set-Cookie'].length - 1));
+        let cookie = response.headers['set-cookie'][0];
+        let endPos = cookie.search(";");
+        this.userData['cookie_id'] = cookie.slice(cookie.search("sessionId=")+10, endPos != -1 ? endPos : (cookie.length-1));
         this.updateHeaderConf();
-        axios.get('/api/user/status', { headers: this.httpConf.headers })
+        axios.get('/api/user/status')
         .then(response => {
           this.onRefreshStatus(response, resolve, reject);
         })
         .catch(error => {
-          console.error("User status could not be obtained.");
-          console.error(error.message);
           reject(error);
         });
       }
       else { // else 'Failed!' with a property 'reason'
-        console.error("Login failed!");
-        console.error(response.data.reason);
         reject(new Error(response.data.reason));
       }
     }
     else {
-      console.error("Could not contact API for log-in.");
       reject(new Error('No proper response was received from the server.'));
     }
   }
   
   updateHeaderConf() {
-    this.httpConf.headers = {
-      'Set-Cookie': `api=${this.userData.cookie_id};`
-    };
+    axios.defaults.withCredentials = true;
+    axios.defaults.headers.get['Cookie'] = `sessionId=${this.userData.cookie_id};`;
+    axios.defaults.headers.post['Cookie'] = `sessionId=${this.userData.cookie_id};`;
   }
   
   // loginData = { email, password }
@@ -78,24 +81,18 @@ class Controller {
           this.onUserLogin(response, resolve, reject);
         })
         .catch(error => {
-          console.error("setCookie error: Could not perform user login!");
-          console.error(error.message);
           reject(error);
         });
       }
       else {
         this.updateHeaderConf();
-        if (!('cookie_id' in this.userData)) {
-          axios.get('/api/user/status', { headers: this.httpConf.headers })
-          .then(response => {
-            this.onRefreshStatus(response, resolve, reject);
-          })
-          .catch(error => {
-            console.error("User status could not be obtained.");
-            console.error(error.message);
-            reject(error);
-          });
-        }
+        axios.get('/api/user/status')
+        .then(response => {
+          this.onRefreshStatus(response, resolve, reject);
+        })
+        .catch(error => {
+          reject(error);
+        });
       }
     });
   }
@@ -112,8 +109,6 @@ class Controller {
           resolve();
         })
         .catch(error => {
-          console.error("DB Selection error: Failed to fetch user data");
-          console.error(error.message);
           reject();
         })
       })
