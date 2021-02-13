@@ -89,9 +89,9 @@ class Database {
     if (matches != null && matches != undefined) {
       sql += " WHERE ";
       for (const item in matches) {
-        sql += `${item} = `+ "'" + matches[item] + "', ";
+        sql += `${item} = `+ "'" + `${matches[item]}` + "' AND ";
       }
-      sql = sql.slice(0, sql.length-2);
+      sql = sql.slice(0, sql.length-4);
     }
     sql += ";";
     
