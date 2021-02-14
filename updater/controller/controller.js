@@ -1,4 +1,5 @@
 const Database = require('../database/database.js');
+const bbcLatest = require('../model/bbc.js');
 const QueryString = require('querystring');
 const axios = require('axios');
 
@@ -6,6 +7,13 @@ class Controller {
   constructor() {
     this.db = new Database();
     this.userData = { };
+  }
+  
+  getNews() {
+    let promises = [ ];
+    promises.push(axios.get('https://www.bbc.com/news/business'));
+    promises.push(axios.get('https://www.bbc.com/news/technology'));
+    return Promise.all(promises);
   }
   
   deleteFromDB() {
