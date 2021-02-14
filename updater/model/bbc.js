@@ -55,11 +55,6 @@ class BbcLatestSectionModel extends Model {
     }
     return links;
   }
-  
-  // params: html code of the article itself
-  grabFullArticle(html) {
-    const aDom = new jsdom.JSDOM(html);
-  }
 }
 
 module.exports = BbcLatestSectionModel;
