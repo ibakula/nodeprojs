@@ -1,20 +1,15 @@
 const controller = new (require('./controller.js'))();
 
 class Main {
-  static fetchAllNews() {
-    let news = controller.getNews();
-    news.then(values => {
-      for (const item of values) {
-        let html = item.data;
-        let url = item.config.url;
-        // extraction of section name through URL
-        let sectionName = item.config.url;
-        let pos = sectionName.search("/");
-        while (pos != -1) {
-          sectionName = sectionName.slice(pos+1);
-          pos = sectionName.search("/");
-        }
-      }
+  static fetchNewsData(link) {
+    return new Promise((resolve, reject) => { 
+      controller.getNews(link)
+      .then(response => {
+        resolve(response);
+      })
+      .catch((error) => {
+        reject(error);
+      });
     });
   }
 
@@ -27,6 +22,7 @@ class Main {
       .catch(err => {
         console.error("App failed to start!");
         error != null ? console.error(error.message) : false;
+        reject(err);
       });
       
       let setCookie = Promise.resolve(init).then(() => {

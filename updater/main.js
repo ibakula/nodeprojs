@@ -1,28 +1,15 @@
 const axios = require('axios');
-const controller = new (require('./controller/controller.js'))('./database/user.db');
+const Main = require('./controller/program.js');
 
-const authorData = {
+const author = {
   'email': 'test@test.com',
-  'password' : 'testing'
+  'password': 'testing'
 };
 
-Promise.resolve(controller.init('./database/user.db'))
+Main.start(author)
 .then(() => {
-  console.log("App initialized!");
+  Main.fetchAllNews();
 })
 .catch(error => {
-  console.error("App failed to start!");
-  error != null ? console.error(error.message) : false;
-})
-.then(() => {
-  controller.setCookie(authorData)
-  .then(() => {
-    console.log("User cookie was successfully set!");
-    console.log(controller.userData);
-  })
-  .catch(error => {
-    console.error("Could not create/update cookie data!");
-    error != null ? console.error(error.message) : false;
-    console.log(controller);
-  });
-});
+console.error(error.message);
+});;

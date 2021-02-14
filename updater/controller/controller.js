@@ -9,11 +9,18 @@ class Controller {
     this.userData = { };
   }
   
-  getNews() {
-    let promises = [ ];
-    promises.push(axios.get('https://www.bbc.com/news/business'));
-    promises.push(axios.get('https://www.bbc.com/news/technology'));
-    return Promise.all(promises);
+  getLatestNews(html, sectionName, url) {
+    let model = null;
+    let links = null;
+    if (url.search("bbc") != -1) {
+      model = new bbcLatest(html, sectionName, url);
+      links = model.linksFullArticle;
+    }
+    return links;
+  }
+  
+  getNews(link) {
+    return Promise.resolve(axios.get(links));
   }
   
   deleteFromDB() {
