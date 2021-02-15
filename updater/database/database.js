@@ -1,6 +1,27 @@
 const sqlite = require('sqlite3').verbose();
 
 function databaseTemplateFn() {
+  let db = null;
+  let isOpen = false;
+  let error = null;
+
+  // End result: resolve(), reject(error)
+  function handleOpen(err, resolve, reject) {
+    if (error == null) {
+      console.log("Database opened successfully!");
+      isOpen = true;
+      error != null ? error = null : 0; // Reset in case reopen occurs
+      resolve();
+    }
+    else {
+      console.error("DB Error: could not open the database.");
+      console.error(error.message);
+      err = error; // "write down" the error
+      isOpen ? isOpen = false : 0;
+      reject(err);
+    }
+  }
+
   return {
     open(dbPath) {
       return new Promise((resolve, reject) => {
@@ -27,26 +48,6 @@ function databaseTemplateFn() {
       });
     }
   };
-}
-
-databaseTemplateFn.prototype.db = null;
-databaseTemplateFn.prototype.isOpen = false;
-databaseTemplateFn.prototype.error = null;
-
-databaseTemplateFn.prototype.handleOpen = (err, resolve, reject) => {
-  if (error == null) {
-    console.log("Database opened successfully!");
-    isOpen = true;
-    error != null ? error = null : 0; // Reset in case reopen occurs
-    resolve();
-  }
-  else {
-    console.error("DB Error: could not open the database.");
-    console.error(error.message);
-    err = error; // "write down" the error
-    isOpen ? isOpen = false : 0;
-    reject(err);
-  }
 }
 
 class Database {
