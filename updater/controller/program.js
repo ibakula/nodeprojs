@@ -1,16 +1,14 @@
 const controller = new (require('./controller.js'))();
+const contentParser = require('../model/ContentParser.js');
 
 class Main {
+  static extractLinks(response) {
+    let sectionName = contentParser.removeAllWordMatchesFromText(response.config.url, "/");
+    return controller.getLatestNews(response.data, sectionName, response.config.url);
+  }
+
   static fetchNewsData(link) {
-    return new Promise((resolve, reject) => { 
-      controller.getNews(link)
-      .then(response => {
-        resolve(response);
-      })
-      .catch((error) => {
-        reject(error);
-      });
-    });
+    return controller.getNews(link);
   }
 
   static start(authorData) {
@@ -21,7 +19,6 @@ class Main {
       })
       .catch(err => {
         console.error("App failed to start!");
-        error != null ? console.error(error.message) : false;
         reject(err);
       });
       
@@ -33,7 +30,6 @@ class Main {
         })
         .catch(error => {
           console.error("Could not create/update cookie data!");
-          error != null ? console.error(error.message) : false;
           if (error.message.search("expired") != -1) {
             console.log("Session cookie has expired and was reset by the server.");
             console.log("Resetting session cookie and attempting to create a new one!");

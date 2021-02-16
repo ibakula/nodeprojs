@@ -1,5 +1,7 @@
 const Database = require('../database/database.js');
 const bbcLatest = require('../model/bbc.js');
+const bbcArticle = require('../model/bbcArticle.js');
+const contentParser = require('../model/ContentParser.js');
 const QueryString = require('querystring');
 const axios = require('axios');
 
@@ -7,20 +9,61 @@ class Controller {
   constructor() {
     this.db = new Database();
     this.userData = { };
+    this.sectionModels = [];
+  }
+
+  cloneArticle(model) {
+    if (model == null) {
+      return;
+    }
+    
+  }
+  
+  readArticle(link) {
+    return new Promise((resolve, reject) => { 
+      axios.get(link)
+      .then(response => {
+        let model = null;
+        if (response.config.url.contains("bbc")) {
+          model = new bbcArticle(response.data, link);
+        }
+        resolve(model);
+      })
+      .catch(error => {
+        reject(error);
+      });
+    });
+  }
+
+  findModel(html, sectionName, url) {
+    if (this.sectionModels.length > 1) {
+      for (let item of this.sectionModels) {
+        let address = item.dom.window.location.origin + item.dom.window.location.pathname
+        if (address == url) {
+          item.updateDom(html);
+          return item;
+        }
+      }
+    }
+    let model = null;
+    if (url.search("bbc") != -1) {
+      model = new bbcLatest(html, sectionName, url);
+    }
+    this.sectionModels.push(model);
+    return model;
   }
   
   getLatestNews(html, sectionName, url) {
-    let model = null;
     let links = null;
+    let model = this.findModel(html, sectionName, url);
     if (url.search("bbc") != -1) {
-      model = new bbcLatest(html, sectionName, url);
-      links = model.linksFullArticle;
+      links = model.linksToFullArticle;
     }
     return links;
   }
   
   getNews(link) {
-    return Promise.resolve(axios.get(links));
+    return axios.get(link);
   }
   
   deleteFromDB() {

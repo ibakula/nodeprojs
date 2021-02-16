@@ -6,7 +6,7 @@ class Model {
   }
 
   updateDom(html) {
-    let address = this.dom.window.origin + this.dom.window.pathname;
+    let address = this.dom.window.location.origin + this.dom.window.location.pathname;
     this.dom = new jsdom.JSDOM(html, { url: address, contentType: "text/html" });
   }
 }

@@ -17,11 +17,21 @@ class ContentParser {
       if (matches >= req) {
         return true;
       }
-      if (body2.search(item) > -1) {
+      if (body2.search(item) != -1) {
         ++matches;
       }
     }
     return false;
+  }
+
+  static removeAllWordMatchesFromText(text, word) {
+    let newText = text;
+    let pos = newText.search(word);
+    while (pos != -1) {
+      newText = newText.slice(pos+word.length);
+      pos = newText.search(word);
+    }
+    return newText;
   }
 }
 
