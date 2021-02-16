@@ -34,12 +34,12 @@ class BbcLatestSectionModel extends Model {
         let postIdStr = latest.children[i].firstElementChild.getElementsByTagName("a")[0].getAttribute("href");
         if (postIdStr != null /*&& postIdStr.search(this.sectionName) > -1*/) {
           let time = latest.children[i].querySelector("time span:last-child").innerHTML;
-          if ((this.lastPostTime != null && this.lastPostTime == time) ||
+          if ((this.lastPostTime != null && this.lastPostTime == time ||
             (time.length > 5 && time.search(date) == -1)) {
+            this.lastPostTime = latest.children[firstChild].querySelector("time span:last-child").innerHTML;
             break;
           }
-          if (this.lastPostTime == null || 
-            i == firstChild) {
+          if (this.lastPostTime == null) {
             this.lastPostTime = latest.children[firstChild].querySelector("time span:last-child").innerHTML;
           }
           yield { postIdStr, time };
