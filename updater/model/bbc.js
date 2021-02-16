@@ -39,7 +39,8 @@ class BbcLatestSectionModel extends Model {
             this.lastPostTime = latest.children[firstChild].querySelector("time span:last-child").innerHTML;
             break;
           }
-          if (this.lastPostTime == null) {
+          if (this.lastPostTime == null ||
+              i == (latest.children.length-1)) {
             this.lastPostTime = latest.children[firstChild].querySelector("time span:last-child").innerHTML;
           }
           yield { postIdStr, time };
