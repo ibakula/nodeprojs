@@ -68,6 +68,14 @@ function separateTermsForSqlQuery(term, table) {
  
   let sql = `SELECT * FROM ${table} WHERE `;
   for (let item in params) {
+    if (term.length > 35) {
+      let item2 = item;
+      if (item2.endsWith("Name")) {
+        item2 = item2.replace("Name", "_name");
+      }
+      sql += `${item2} LIKE '%${term}%'`;
+      continue;
+    }
     let term2 = term;
     do {
       nextPos = term2.search(" ");
@@ -82,7 +90,10 @@ function separateTermsForSqlQuery(term, table) {
     sql = sql.slice(0, (sql.length-(table == 'users' ? 4 : 5)));
     sql += ' OR ';
   }
-  sql = sql.slice(0, (sql.length-4));
+  
+  if (term.length < 36) {
+    sql = sql.slice(0, (sql.length-4));
+  }
   sql += ` ORDER BY id DESC LIMIT 10;`;
   return sql;
 }
