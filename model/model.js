@@ -45,6 +45,25 @@ const subscriberStruct = {
     'email' : 'string'
 }
 
+function escapeSpecificCharacters(term) {
+  let sentence = term;
+  let escapees = '\'"`';
+  for (let i = 0; i < escapees.length; ++i) {
+    let pos = sentence.search(escapees.charAt(i));
+    if (pos != -1) {
+      let lastPos = 0;
+      let part = "";
+      while (pos != -1) {
+       sentence = sentence.slice(0, lastPos+pos) + '\\' + sentence.slice(lastPos+pos);
+       lastPos += pos+2;
+       part = sentence.slice(lastPos);
+       pos = part.search(escapees.charAt(i));
+      }
+    }
+  }
+  return sentence;
+}
+
 function separateTermsForSqlQuery(term, table) {
   let nextPos = -1;
   let termArr = [];
@@ -279,7 +298,8 @@ const model = {
           return;
         }
         
-        let sql = separateTermsForSqlQuery(req.body.term, table);
+        let term2 = escapeSpecificCharacters(req.body.term);
+        let sql = separateTermsForSqlQuery(term2, table);
         
         db.all(sql, 
           (err, rows) => {
