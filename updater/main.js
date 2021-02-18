@@ -31,10 +31,9 @@ function main() {
   Main.start(author)
   .then(() => createPromiseForAllLinks())
   .then(responses => createLinksArray(responses))
-  .then(links => console.log(links))
-  .then(() => createPromiseForAllLinks())
-  .then(responses => createLinksArray(responses))
-  .then(links => console.log(links))
+  .then(links => Main.getArticle(links[0].postIdStr))
+  .then(text => Main.searchForArticle(text))
+  .then(response => console.log(response.data))
   .catch(error => {
     console.error(error.message);
   });

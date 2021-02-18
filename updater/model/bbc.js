@@ -31,7 +31,7 @@ class BbcLatestSectionModel extends Model {
         if (firstChild == false) {
           firstChild = i;
         }
-        let postIdStr = latest.children[i].firstElementChild.getElementsByTagName("a")[0].getAttribute("href");
+        let postIdStr = this.dom.window.location.origin + latest.children[i].firstElementChild.getElementsByTagName("a")[0].getAttribute("href");
         if (postIdStr != null /*&& postIdStr.search(this.sectionName) > -1*/) {
           let time = latest.children[i].querySelector("time span:last-child").innerHTML;
           if (this.lastPostTime != null && this.lastPostTime == time ||

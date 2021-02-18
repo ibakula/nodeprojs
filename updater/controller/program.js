@@ -7,6 +7,14 @@ class Main {
     return controller.getLatestNews(response.data, sectionName, response.config.url);
   }
 
+  static searchForArticle(text) {
+    return controller.searchArticle(text);
+  }
+
+  static getArticle(link) {
+    return controller.readArticle(link);
+  }
+
   static fetchNewsData(link) {
     return controller.getNews(link);
   }

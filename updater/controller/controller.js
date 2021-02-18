@@ -18,16 +18,20 @@ class Controller {
     }
     
   }
+
+  searchArticle(text) {
+    return axios.post('/api/posts/search', QueryString.stringify({ 'term' : text }));
+  }
   
   readArticle(link) {
     return new Promise((resolve, reject) => { 
       axios.get(link)
       .then(response => {
         let model = null;
-        if (response.config.url.contains("bbc")) {
+        if (response.config.url.search("bbc")) {
           model = new bbcArticle(response.data, link);
+          resolve(model.articleData);
         }
-        resolve(model);
       })
       .catch(error => {
         reject(error);
