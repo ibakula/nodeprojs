@@ -54,7 +54,7 @@ function escapeSpecificCharacters(term) {
       let lastPos = 0;
       let part = "";
       while (pos != -1) {
-       sentence = sentence.slice(0, lastPos+pos) + '\\' + sentence.slice(lastPos+pos);
+       sentence = sentence.slice(0, lastPos+pos) + (i == 0 ? '\'' : '\\') + sentence.slice(lastPos+pos);
        lastPos += pos+2;
        part = sentence.slice(lastPos);
        pos = part.search(escapees.charAt(i));
@@ -92,7 +92,7 @@ function separateTermsForSqlQuery(term, table) {
       if (item2.endsWith("Name")) {
         item2 = item2.replace("Name", "_name");
       }
-      sql += `${item2} LIKE '%${term}%'`;
+      sql += `${item2} LIKE '%${term}%' OR `;
       continue;
     }
     let term2 = term;
@@ -109,10 +109,7 @@ function separateTermsForSqlQuery(term, table) {
     sql = sql.slice(0, (sql.length-(table == 'users' ? 4 : 5)));
     sql += ' OR ';
   }
-  
-  if (term.length < 36) {
-    sql = sql.slice(0, (sql.length-4));
-  }
+  sql = sql.slice(0, (sql.length-4));
   sql += ` ORDER BY id DESC LIMIT 10;`;
   return sql;
 }
