@@ -27,19 +27,37 @@ function createLinksArray(responses) {
   return links;
 }
 
+function fetchArticles(links) {
+  let promises = [];
+  for (const link of links) {
+    promises.push(Main.getArticle(item.postIdStr));
+  }
+  return Promise.all(promises);
+}
+
+function searchForArticles(texts) {
+  let promises = [];
+  for (const text of texts) {
+    promises.push(Main.searchForArticle(response.data));
+  }
+  return Promise.all(promises);
+}
+
 function main() {
   Main.start(author)
   .then(() => createPromiseForAllLinks())
   .then(responses => createLinksArray(responses))
-  .then(links => Main.getArticle(links[0].postIdStr))
-  .then(text => Main.searchForArticle(text))
-  .then(response => { 
-    if (!('data' in response) || 
-      (!Array.isArray(response.data) && !('id' in response.data)) ||
-      (Array.isArray(response.data) && response.data.length < 1)) {
-      return;
+  .then(links => fetchArticles(links))
+  .then(texts => searchForArticles(texts))
+  .then(responses => { 
+    for (const response of responses) {
+      if (!('data' in response) || 
+        (!Array.isArray(response.data) && !('id' in response.data)) ||
+        (Array.isArray(response.data) && response.data.length < 1)) {
+        continue;
+      }
+      
     }
-    
   })
   .catch(error => {
     console.error(error.message);
