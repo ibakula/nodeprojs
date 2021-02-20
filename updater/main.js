@@ -33,7 +33,14 @@ function main() {
   .then(responses => createLinksArray(responses))
   .then(links => Main.getArticle(links[0].postIdStr))
   .then(text => Main.searchForArticle(text))
-  .then(response => console.log(response.data))
+  .then(response => { 
+    if (!('data' in response) || 
+      (!Array.isArray(response.data) && !('id' in response.data)) ||
+      (Array.isArray(response.data) && response.data.length < 1)) {
+      return;
+    }
+    
+  })
   .catch(error => {
     console.error(error.message);
   });
