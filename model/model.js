@@ -87,7 +87,7 @@ function separateTermsForSqlQuery(term, table) {
  
   let sql = `SELECT * FROM ${table} WHERE `;
   for (let item in params) {
-    if (term.length > 35) {
+    if (term.length > 70) {
       let item2 = item;
       if (item2.endsWith("Name")) {
         item2 = item2.replace("Name", "_name");
