@@ -7,8 +7,12 @@ class Main {
     return controller.getLatestNews(response.data, sectionName, response.config.url);
   }
 
-  static searchForArticle(text) {
-    return controller.searchArticle(text);
+  static insertArticle(textObj, categoryId) {
+    return controller.cloneArticle(textObj, categoryId);
+  }
+
+  static searchForArticle(textObj) {
+    return controller.searchArticle(textObj);
   }
 
   static getArticle(link) {

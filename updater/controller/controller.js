@@ -12,15 +12,26 @@ class Controller {
     this.sectionModels = [];
   }
 
-  cloneArticle(model) {
-    if (model == null) {
-      return;
+  cloneArticle(textObj, categoryId) {
+    if (textObj == null || 
+      textObj.title.length < 3 || 
+      textObj.text.length < 3) {
+      return Promise.reject(new Error('Text error: text content invalid.'));
     }
-    
+    return axios.post('/api/posts', QueryString.stringify({'title': textObj.title,
+      'text': textObj.text,
+      'categoryId' : categoryId}));
   }
 
-  searchArticle(text) {
-    return axios.post('/api/posts/search', QueryString.stringify({ 'term' : text }));
+  searchArticle(textObj) {
+    return Promise.resolve(axios.post('/api/posts/search', 
+     QueryString.stringify({ 'term' : textObj.title })))
+     .then(response => {
+       return ({ res: response, contentObj: textObj });
+     },
+     error => { 
+       throw error; 
+     });
   }
   
   readArticle(link) {
@@ -42,7 +53,7 @@ class Controller {
   findModel(html, sectionName, url) {
     if (this.sectionModels.length > 1) {
       for (let item of this.sectionModels) {
-        let address = item.dom.window.location.origin + item.dom.window.location.pathname
+        let address = item.dom.window.location.origin + item.dom.window.location.pathname;
         if (address == url) {
           item.updateDom(html);
           return item;
