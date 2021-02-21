@@ -1,6 +1,9 @@
 const axios = require('axios');
 const Main = require('./controller/program.js');
 
+// This setting refers to minutes
+const updateInterval = 1;
+
 const author = {
   'email': 'test@test.com',
   'password': 'testing'
@@ -47,6 +50,19 @@ function searchForArticles(textArr) {
   return Promise.all(promises);
 }
 
+function postArticles(responsesObj) {
+  let promises = [];
+  for (const response of responsesObj.responses) {
+    if ((!Array.isArray(response.res.data) && 'id' in response.res.data) ||
+      (Array.isArray(response.res.data) && response.res.data.length > 0)) {
+      // Article already posted
+      continue;
+    }
+    promises.push(Main.insertArticle(response.contentObj, links[responsesObj.url]));
+  }
+  return Promise.all(promises);
+}
+
 function main() {
   Main.start(author)
   .then(() => createPromiseForAllLinks())
@@ -55,17 +71,9 @@ function main() {
     .then(textArr => ({ 'textArr': textArr, 'url': linksObj.url })))
   .then(textObj => searchForArticles(textObj.textArr)
     .then(responses => ({ 'responses': responses, 'url': textObj.url })))
-  .then(responsesObj => { 
-    let promises = [];
-    for (const response of responsesObj.responses) {
-      if ((!Array.isArray(response.res.data) && 'id' in response.res.data) ||
-        (Array.isArray(response.res.data) && response.res.data.length > 0)) {
-        // Article already posted
-        continue;
-      }
-      //promises.push(Main.insertArticle(response.contentObj, links[responsesObj.url]));
-    }
-    return promises;
+  .then(postArticles)
+  .then(responses => {
+    setTimeout(() => { main(); }, (updateInterval*60*1000));
   })
   .catch(error => {
     console.error(error.message);
