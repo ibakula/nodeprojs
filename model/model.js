@@ -165,14 +165,14 @@ function containsValidInput(table, params) {
     return true;
 }
 
-function createInsertStatmentBasedOnTableName(table, params) {
+function createInsertStatmentBasedOnTableName(table, params, userId = null) {
     let sql = `INSERT INTO ${table} `;
     let now = Date.now();
 
     switch (table) {
         case `posts`:
             sql += `(title, text, category_id, author_id, views, date) VALUES ('${params.title}', '${params.text}',
-            '${params.categoryId}', '${params.authorId}', '0', '${now}');`;
+            '${params.categoryId}', '${userId}', '0', '${now}');`;
             break;
         case `categories`:
             sql += `(title, img) VALUES('${params.title}', '${params.img}');`;
@@ -436,7 +436,7 @@ const model = {
             return;
         }
         
-        let sql = createInsertStatmentBasedOnTableName(table, next.request.body);
+        let sql = createInsertStatmentBasedOnTableName(table, next.request.body, next.request.session.userId);
         db.run(sql, (err) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, 

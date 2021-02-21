@@ -46,7 +46,8 @@ class BbcArticleModel extends Model {
         }
       }
     }
-    return text;
+    
+    return { 'title': article.querySelector("#main-heading").innerHTML, 'text': text };
   }
 }
 
