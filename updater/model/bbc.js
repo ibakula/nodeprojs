@@ -27,12 +27,15 @@ class BbcLatestSectionModel extends Model {
     let date = now.getDate() + " " +  this.monthNames[now.getMonth()];
     let firstChild = false;
     for (let i = 0; i < latest.children.length; ++i) {
+      if (latest.children[i].innerHTML.search("iframe") != -1) {
+        continue;
+      }
       if (latest.children[i].tagName == "LI") {
         if (firstChild == false) {
           firstChild = i;
         }
         let postIdStr = this.dom.window.location.origin + latest.children[i].firstElementChild.getElementsByTagName("a")[0].getAttribute("href");
-        if (postIdStr != null /*&& postIdStr.search(this.sectionName) > -1*/) {
+        if (postIdStr != null && postIdStr.search(this.sectionName) != -1) {
           let time = latest.children[i].querySelector("time span:last-child").innerHTML;
           if (this.lastPostTime != null && this.lastPostTime == time ||
             (time.length > 5 && time.search(date) == -1)) {
