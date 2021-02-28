@@ -36,7 +36,10 @@ class BbcArticleModel extends Model {
       }
       else if (item.getAttribute("data-component") == "crosshead-block") {
         const element = item.querySelector("h2");
-        if (element != null && element.innerHTML.search("interested") == -1) {
+        if (element != null) {
+          if (element.innerHTML.search("interested") != -1 || element.innerHTML.search("read more") != -1) {
+            break;
+          }
           element.removeAttribute("class");
           text += element.outerHTML + "<br />";
         }
