@@ -300,7 +300,8 @@ function handleFetchArticle(response) {
     }
     const allImages = sectionElements['articleSection'].querySelectorAll("IMG");
     for (const image of allImages) {
-      if (image.getAttribute("alt").search("line") != -1) {
+      if (image.getAttribute("alt").search("line") != -1 || 
+        image.getAttribute("alt") == "Presentational white space") {
         image.style = "width:100%;";
         image.setAttribute("height", "2");
       }
