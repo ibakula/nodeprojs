@@ -26,6 +26,11 @@ class BbcArticleModel extends Model {
       if (item.getAttribute("data-component") == "image-block") {
         const element = item.querySelector("img");
         if (element != null) {
+          if (element.getAttribute("alt").search(/bbc/i) != -1 ||
+            element.getAttribute("alt").search(/read more/i) != -1 ||
+            element.getAttribute("alt").search(/interested/i) != -1 ) {
+            break;
+          }
           element.removeAttribute("srcset");
           element.removeAttribute("loading");
           element.removeAttribute("class");
@@ -37,7 +42,9 @@ class BbcArticleModel extends Model {
       else if (item.getAttribute("data-component") == "crosshead-block") {
         const element = item.querySelector("h2");
         if (element != null) {
-          if (element.innerHTML.search("interested") != -1 || element.innerHTML.search("read more") != -1) {
+          if (element.innerHTML.search(/interested/i) != -1 || 
+            element.innerHTML.search(/read more/i) != -1 ||
+            element.innerHTML.search(/bbc/i) != -1) {
             break;
           }
           element.removeAttribute("class");
@@ -47,6 +54,10 @@ class BbcArticleModel extends Model {
       else {
         const element = item.querySelector("p");
         if (element != null) {
+          if (element.innerHTML.search(/bbc/i) != -1 || 
+            element.innerHTML.search(/BBC/i) != -1) {
+            continue;
+          }
           text += element.innerHTML + "<br /><br />";
         }
       }
