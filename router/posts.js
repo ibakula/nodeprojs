@@ -11,6 +11,9 @@ router.get('/last', (req, res, next) => {
 router.get('/popular', (req, res, next) => {
    controller.handleGetPopularPosts(req, res, next);
 });
+router.get('/recommended/:categoryId', (req, res, next) => {
+   controller.handleGetRecommended(req, res, next);
+});
 router.get('/:id', (req, res, next) => {
     controller.getData(req, res, 'posts', next);
 });

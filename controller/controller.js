@@ -69,6 +69,9 @@ const controller = {
     },
     handleGetPopularPosts: (req, res, next) => {
         model.getPopularPosts(req, res, controller.handleRequest);
+    },
+    handleGetRecommended: (req, res, next) => {
+        model.getRecommendedPosts(req, res, controller.handleRequest);
     }
 };
 

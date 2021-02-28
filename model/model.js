@@ -47,7 +47,7 @@ const subscriberStruct = {
 
 function escapeSpecificCharacters(term) {
   let sentence = term;
-  let escapees = '\'"`';
+  let escapees = '\'';
   for (let i = 0; i < escapees.length; ++i) {
     let pos = sentence.search(escapees.charAt(i));
     if (pos != -1) {
@@ -171,7 +171,9 @@ function createInsertStatmentBasedOnTableName(table, params, userId = null) {
 
     switch (table) {
         case `posts`:
-            sql += `(title, text, category_id, author_id, views, date) VALUES ('${params.title}', '${params.text}',
+            let title = escapeSpecificCharacters(params.title);
+            let text = escapeSpecificCharacters(params.text);
+            sql += `(title, text, category_id, author_id, views, date) VALUES ('${title}', '${text}',
             '${params.categoryId}', '${userId}', '0', '${now}');`;
             break;
         case `categories`:
@@ -297,7 +299,7 @@ const model = {
         
         let term2 = escapeSpecificCharacters(req.body.term);
         let sql = separateTermsForSqlQuery(term2, table);
-        
+       
         db.all(sql, 
           (err, rows) => {
               if (err) {
@@ -437,6 +439,7 @@ const model = {
         }
         
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body, next.request.session.userId);
+        
         db.run(sql, (err) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, 
@@ -615,6 +618,22 @@ const model = {
                         next(req, res, {}, null);
                     }
                 }
+        });
+    },
+    getRecommendedPosts: (req, res, next) => {
+        if (!containsValidInput('posts', req.params)) {
+          next(req, res, {'result':'Failed!',
+          'reason':'input compliance fallthrough'}, null);
+          return;
+        }
+        db.all(`SELECT * FROM posts WHERE category_id = '${req.params.categoryId}' ORDER BY id DESC LIMIT 5`, (error, rows) => {
+            if (error != null) {
+                console.error("DB Error: could not fetch recommended posts!");
+                console.error(error.message);
+                next(req, res, {}, null);
+                return;
+            }
+            next(req, res, rows, null);
         });
     }
 };
