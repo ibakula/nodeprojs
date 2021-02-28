@@ -7,7 +7,7 @@ class BbcArticleModel extends Model {
   }
   
   get articleData() {
-    const article = this.dom.window.document.body
+    let article = this.dom.window.document.body
     .querySelector("#main-content:nth-last-child(2) article");
     let text = "";
     for (let item of article.children) {
@@ -29,12 +29,14 @@ class BbcArticleModel extends Model {
           element.removeAttribute("srcset");
           element.removeAttribute("loading");
           element.removeAttribute("class");
+          element.setAttribute("width", "430px");
+          element.setAttribute("height", "300px");
           text += element.outerHTML + "<br />";
         }
       }
       else if (item.getAttribute("data-component") == "crosshead-block") {
         const element = item.querySelector("h2");
-        if (element != null) {
+        if (element != null && element.innerHTML.search("interested") == -1) {
           element.removeAttribute("class");
           text += element.outerHTML + "<br />";
         }
@@ -42,10 +44,11 @@ class BbcArticleModel extends Model {
       else {
         const element = item.querySelector("p");
         if (element != null) {
-          text += element.innerHTML + "<br />";
+          text += element.innerHTML + "<br /><br />";
         }
       }
     }
+    text = text.trim();
     
     return { 'title': article.querySelector("#main-heading").innerHTML, 'text': text };
   }
