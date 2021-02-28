@@ -25,7 +25,6 @@ function handleLoadPostsFromEnd(response) {
     .catch(handleErrors)
     .then((res) => { handleLoadNextPost(res, c); })
     .catch(handleErrors);
-    console.log("fromend "+c);
   }
 }
 
@@ -52,19 +51,28 @@ function handleLoadNextPost(response, count) {
     return;
   }
   let skimmed = splitData(response.data.text);
+
+  // Remove all inner HTML
+  let element = document.createElement("p");
+  element.innerHTML = response.data.title;
+  response.data.title = element.innerText;
+  element.innerHTML = skimmed.text;
+  skimmed.text = element.innerText;
+  element.innerHTML = skimmed.img;
+  skimmed.text.trim();
+  skimmed.title.trim();
   
   for (let i = 0; 
     i < featured.children[2+count].children.length; 
     ++i) {
     if (featured.children[2+count].children[i].tagName == "IMG" && skimmed.img.length > 0) {
-      let imgSrcPos = skimmed.img.search("src=");
-      featured.children[2+count].children[i].setAttribute("src", skimmed.img.slice(0, imgSrcPos));
+      featured.children[2+count].children[i].setAttribute("src", element.firstElementChild.getAttribute("src"));
     }
     if (featured.children[2+count].children[i].tagName == "H2") {
-      featured.children[2+count].children[i].innerText = response.data.title;
+      featured.children[2+count].children[i].innerHTML = response.data.title;
     }
     if (featured.children[2+count].children[i].tagName == "P") {
-      featured.children[2+count].children[i].innerText = skimmed.text.slice(0, 100);
+      featured.children[2+count].children[i].innerHTML = skimmed.text.slice(0, 100);
     }
   }
 }

@@ -44,29 +44,16 @@ function clearContent(type) {
 function splitData(data) {
   let skimmedData = { 
     img : '', 
-    text : '' 
+    text : data 
   };
 
   let imgPos = data.search("<img");
-  let endPos = -1;
   if (imgPos != -1) {
-    endPos = data.search(">");
+    let endPos = data.search(">");
     if (endPos != -1) {
-      let imgTag = '';
-      for (let i = imgPos; i <= endPos; ++i) {
-        imgTag += data.charAt(i);
-      }
-      if (imgTag.length > 0) {
-        skimmedData.img = imgTag;
-      }
-      skimmedData.text = data.slice(endPos+1);
+      skimmedData.img = data.slice(imgPos, endPos+1);
+      skimmedData.text = data.slice(0, imgPos) + data.slice(endPos+1);
     }
-    else {
-      skimmedData.text = data;
-    }
-  }
-  else {
-    skimmedData.text = data;
   }
   return skimmedData;
 }
@@ -81,7 +68,9 @@ function createNewArticle(type = 'main', data) {
       article.appendChild(document.createElement("div"));
       article.lastElementChild.className = "col-sm-auto";
       if (skimmed.img.length > 0) {
-          article.lastElementChild.innerHTML = skimmed.img;
+        article.lastElementChild.innerHTML = skimmed.img;
+        article.lastElementChild.lastElementChild.setAttribute("width", "160px");
+        article.lastElementChild.lastElementChild.setAttribute("height", "100px");
       }
       article.appendChild(document.createElement("div"));
       article.lastElementChild.className = "col-sm";
@@ -94,19 +83,46 @@ function createNewArticle(type = 'main', data) {
       article.lastElementChild.lastElementChild.className = "text-muted";
       article.lastElementChild.lastElementChild.innerText = date.getDate() + "." + (date.getMonth()+1) + ".";
       article.lastElementChild.appendChild(document.createElement("p"));
-      article.lastElementChild.lastElementChild.innerText = skimmed.text;
+      article.lastElementChild.lastElementChild.innerHTML = skimmed.text;
+      if (article.lastElementChild.lastElementChild.firstElementChild != null &&
+        article.lastElementChild.lastElementChild.firstElementChild.tagName == "BR") {
+        article.lastElementChild.lastElementChild.firstElementChild.remove();
+      }
+      if (article.lastElementChild.lastElementChild.innerHTML.length > 300) {
+        article.lastElementChild.lastElementChild.innerHTML = 
+        article.lastElementChild.lastElementChild.innerHTML.slice(0, 300) + "...";
+      }
       break;
     case 'aside':
       if (skimmed.img.length > 0) {
-          article.innerHTML = skimmed.img;
+        article.innerHTML = skimmed.img;
+        article.lastElementChild.setAttribute("width", "220px");
+        article.lastElementChild.setAttribute("height", "150px");
+        article.lastElementChild.className = "mb-3";
       }
       article.appendChild(document.createElement("a"));
       article.lastElementChild.setAttribute("href", ("article.html?id="+data.id));
       article.lastElementChild.appendChild(document.createElement("h3"));
       article.lastElementChild.lastElementChild.innerText = data.title;
+      if (article.lastElementChild.lastElementChild.innerText.length > 30) {
+        article.lastElementChild.lastElementChild.innerText =
+        article.lastElementChild.lastElementChild.innerText.slice(0, 30) + "...";
+      }
       article.appendChild(document.createElement("p"));
       article.lastElementChild.className = "lead overflow-hidden";
-      article.lastElementChild.innerText = skimmed.text;
+      article.lastElementChild.innerHTML = skimmed.text;
+      if (article.lastElementChild.firstElementChild != null &&
+        article.lastElementChild.firstElementChild.tagName == "BR") {
+        article.lastElementChild.firstElementChild.remove();
+      }
+      let attachedImages = article.lastElementChild.getElementsByTagName("IMG");
+      for(let i = attachedImages.length-1; i > -1; --i) {
+        attachedImages[i].remove();
+      }
+      if (article.lastElementChild.innerHTML.length > 120) {
+        article.lastElementChild.innerHTML =
+        article.lastElementChild.innerHTML.slice(0, 120) + "...";
+      }
       break;
   }
   return article;

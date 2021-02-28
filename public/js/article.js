@@ -1,19 +1,12 @@
 let isLoaded = false;
 let params = new URLSearchParams(window.location.search);
 let id = -1;
+let categoryId = false;
 let sectionElements = {
   'articleSection' : document.getElementById("content").firstElementChild.firstElementChild,
   'aside' : document.getElementById("content").lastElementChild,
   'recommendation' : document.getElementById("content").nextElementSibling.lastElementChild,
   'comments' : document.querySelector("footer").previousElementSibling.firstElementChild
-}
-
-let confLoadMaxArticles = {
-  'recommendation' : 6
-}
-
-let loadedPostCount = {
-  'recommendation' : 0
 }
 
 let loadedPostPos = {
@@ -41,22 +34,23 @@ function main() {
   }
   // First load the article
   axios.get(('/api/posts/'+id))
-  .catch(handleGetError)
   .then(handleFetchArticle)
+  // And now recommended articles
+  .then(() => {
+      if (categoryId != false) {
+        axios.get('/api/posts/recommended/'+categoryId)
+        .then(handleGetArticlesFromEnd)
+        .catch(handleGetError); 
+      }
+    }
+  )
   .catch(handleGetError);
   // Now load the most popular sidebar
   axios.get('/api/posts/popular')
-  .catch(handleGetError)
-  .then((response) => { handleGetPopularArticles(response, 'aside'); })
+  .then(handleGetPopularArticles)
   .catch(handleGetError);
-  // And now recommended articles
-  setTimeout(() => { axios.get('/api/posts/last')
-  .catch(handleGetError)
-  .then(handleGetArticlesFromEnd)
-  .catch(handleGetError); }, 3000);
   // Load comments
   axios.get(('/api/comments/post/'+id))
-  .catch(handleGetError)
   .then(handleGetComments)
   .catch(handleGetError);
   document.getElementById('commentary_form').lastElementChild.addEventListener("click", handleSendFormData);
@@ -141,103 +135,94 @@ function handleGetUser(res, text, commentDate) {
 
 function handleGetArticlesFromEnd(response) {
   removeAllContent('recommendation');
-  if (!response.data || !('id' in response.data)) {
+  if (!response.data || response.data.length < 1) {
     sectionElements['recommendation'].appendChild(document.createElement("p"));
     sectionElements['recommendation'].lastElementChild.className = "lead";
     sectionElements['recommendation'].lastElementChild.innerText = "Sorry, could not find any content.. ";
     return;
   }
   
-  let promises = [];
-  for (let i = response.data.id;
-    i < (response.data.id+1) && i > 0 ;
-    --i) {
-    if (i == id) {
+  for (let i = 0; i < response.data.length; ++i) {
+    if (response.data[i].id == id) {
       continue;
     }
-    if (loadedPostCount['recommendation'] >= confLoadMaxArticles['recommendation']) {
-     /*
-      * these two settings can be used to load
-      * "more" pages or "show more" / next
-      * ..in case there is much more content
-      * in db, it could be searched thoroughly
-      */
-      loadedPostPos['recommendation'] = i;
-      loadedPostCount['recommendation'] = 0;
-      break;
-    }
-    promises.push(axios.get(('/api/posts/'+i))
-    .catch(handleGetError)
-    .then(res => { handleGetArticleAndFindSimilarTopics(res, response.data['category_id']); })
-    .catch(handleGetError));
-  }
-  Promise.all(promises).then(() => {
-    if (sectionElements['recommendation'].getElementsByTagName("article").length < 1) {
-      sectionElements['recommendation'].appendChild(document.createElement("p"));
-      sectionElements['recommendation'].lastElementChild.className = "lead";
-      sectionElements['recommendation'].lastElementChild.innerText = "Sorry, could not find any content.. ";
-    }
-  });
-}
-
-function handleGetArticleAndFindSimilarTopics(response, categoryId) {
-  if (!response.data || !('id' in response.data)) {
-    return;
-  }
-
-  if (response.data['category_id'] == categoryId)  {
-    addRecommendedArticle(response.data);
+    addRecommendedArticle(response.data[i]);
   }
 }
 
 function addRecommendedArticle(articleData) {
   let skimmed = skimData(articleData.text);
   let date = new Date(parseInt(articleData.date));
+  if (articleData.title.length > 30) {
+    articleData.title = articleData.title.slice(0, 30) + "...";
+  }
   let html = `<article class="card card-body mr-5 mt-3 overflow-hidden"><a class="card-title card-link" href="article.html?id=${articleData.id}"><h3>${articleData.title}</h3></a>`;
   if (skimmed.img.length > 0) {
-    html += skimmed.img;
+    let element = document.createElement("p");
+    element.innerHTML = skimmed.img;
+    element.firstElementChild.setAttribute("width", "220px");
+    element.firstElementChild.setAttribute("height", "150px");
+    element.firstElementChild.className = "mb-3";
+    html += element.innerHTML;
   }
-  html += `<p class="text-muted lead">` + date.getDate() + "." + (date.getMonth()+1)  + `.</p><p class="card-text lead">${skimmed.text}</p></article>`;
+  let textElement = document.createElement("p");
+  textElement.innerHTML = skimmed.text;
+  let attachedImages = textElement.getElementsByTagName("IMG");
+  for(let i = attachedImages.length-1; i > -1; --i) {
+    attachedImages[i].remove();
+  }
+  if (textElement.innerText.length > 120) {
+    textElement.innerText = textElement.innerText.slice(0, 120) + "...";
+  }
+  html += `<p class="text-muted lead">` + date.getDate() + "." + (date.getMonth()+1)  + `.</p><p class="card-text lead">${textElement.innerHTML}</p></article>`;
   sectionElements['recommendation'].innerHTML += html;
 }
 
-function handleGetPopularArticles(response, type) {
+function handleGetPopularArticles(response) {
   if (!response.data || !Array.isArray(response.data) || response.data.length < 1) {
     return;
   }
   removeAllContent('aside');
   for (let i = 0; i < response.data.length; ++i) {
-    setTimeout(() => { loadArticle(response.data[i], type); }, (2000*(i+1)));
+    loadArticle(response.data[i]);
   }
 }
 
-function loadArticle(data, type) {
+function loadArticle(data) {
   if (data && 'text' in data) {
-    let article = createNewArticle(type, data);
-    if (type == 'main') {
-      article.className = "row overflow-hidden lead";
-    }
+    let article = createNewArticle(data);
     if (subscriptionElement == null) {
-      subscriptionElement = sectionElements[type].children[1];
+      subscriptionElement = sectionElements['aside'].children[1];
     }
-    sectionElements[type].insertBefore(article, subscriptionElement);
+    sectionElements['aside'].insertBefore(article, subscriptionElement);
   }
 }
 
-function createNewArticle(type = 'main', data) {
+function createNewArticle(data) {
   let article = document.createElement("article");
   let skimmed = skimData(data.text); // { img: tag, text: text }
 
   if (skimmed.img.length > 0) {
     article.innerHTML = skimmed.img;
+    article.lastElementChild.setAttribute("width","220px");
+    article.lastElementChild.setAttribute("height","150px");
+    article.lastElementChild.className = "mb-3";
   }
   article.appendChild(document.createElement("a"));
   article.lastElementChild.setAttribute("href", ("article.html?id="+data.id));
   article.lastElementChild.appendChild(document.createElement("h3"));
-  article.lastElementChild.lastElementChild.innerText = data.title;
+  if (data.title.length > 20) {
+    data.title = data.title.slice(0, 20) + "...";
+  }
+  article.lastElementChild.lastElementChild.innerHTML = data.title;
   article.appendChild(document.createElement("p"));
   article.lastElementChild.className = "lead overflow-hidden";
-  article.lastElementChild.innerText = skimmed.text;
+  article.lastElementChild.innerHTML = skimmed.text;
+  let text = article.lastElementChild.innerText;
+  if (text.length > 85) {
+    text = text.slice(0, 85) + "...";
+  }
+  article.lastElementChild.innerHTML = text;
   return article;
 }
 
@@ -292,25 +277,39 @@ function handleGetError(error) {
 
 function handleFetchArticle(response) {
   if (response.data && 'id' in response.data) {
+    categoryId = response.data['category_id'];
     removeAllContent('articleSection');
     let date = new Date(parseInt(response.data.date));
     let skimmedData = skimData(response.data.text);
-    sectionElements['articleSection'].appendChild(document.createElement("p"));
-    sectionElements['articleSection'].appendChild(document.createElement("p"));
+    sectionElements['articleSection'].appendChild(document.createElement("P"));
+    sectionElements['articleSection'].appendChild(document.createElement("P"));
     sectionElements['articleSection'].lastElementChild.className = "text-muted";
     sectionElements['articleSection'].lastElementChild.innerText = date.getDate() + "." + (date.getMonth()+1) + "." + date.getFullYear() + " at " + date.getHours() + ":" + date.getMinutes();
     if (skimmedData.img.length > 0) {
-      sectionElements['articleSection'].appendChild(document.createElement("img"));
-      sectionElements['articleSection'].innerHTML = skimmedData.img;
+      sectionElements['articleSection'].innerHTML += skimmedData.img;
       sectionElements['articleSection'].appendChild(document.createElement("br"));
       sectionElements['articleSection'].appendChild(document.createElement("br"));
     }
-    sectionElements['articleSection'].appendChild(document.createElement("h1"));
-    sectionElements['articleSection'].lastElementChild.innerText = response.data.title;
-    sectionElements['articleSection'].appendChild(document.createElement("p"));
-    sectionElements['articleSection'].lastElementChild.innerText = skimmedData.text;
+    sectionElements['articleSection'].appendChild(document.createElement("H1"));
+    sectionElements['articleSection'].lastElementChild.innerHTML = response.data.title;
+    sectionElements['articleSection'].appendChild(document.createElement("P"));
+    sectionElements['articleSection'].lastElementChild.innerHTML = skimmedData.text;
+    if (sectionElements['articleSection'].lastElementChild.firstElementChild != null &&    
+      sectionElements['articleSection'].lastElementChild.firstElementChild.tagName == "BR") {
+      sectionElements['articleSection'].lastElementChild.firstElementChild.remove();
+    }
+    const allImages = sectionElements['articleSection'].querySelectorAll("IMG");
+    for (const image of allImages) {
+      if (image.getAttribute("alt").search("line") != -1) {
+        image.style = "width:100%;";
+        image.setAttribute("height", "2");
+      }
+      else {
+        image.setAttribute("width", "430px");
+        image.setAttribute("height", "300px");
+      }
+    }
     axios.get(('/api/users/'+response.data['author_id']))
-    .catch(handleGetError)
     .then(handleGetAuthorById)
     .catch(handleGetError);
   }
@@ -340,11 +339,11 @@ function skimData(text) {
     'img' : ''
   };
   let imgPos = text.search("<img");
-  if (imgPos > -1) {
+  if (imgPos != -1) {
     let imgEndPos = text.search(">");
     if (imgEndPos > -1) {
-      skimmed.text = text.slice(imgPosEnd+1);
-      skimmed.img = text.slice(imgPos, (imgPosEnd+1));
+      skimmed.text = text.slice(0, imgPos) + text.slice(imgEndPos+1);
+      skimmed.img = text.slice(imgPos, (imgEndPos+1));
     }
   }
   return skimmed; 
@@ -352,7 +351,7 @@ function skimData(text) {
 
 function handleGetAuthorById(response) {
   if (response.data && 'id' in response.data) {
-    sectionElements['articleSection'].firstElementChild.innerText = `Authored by ${response.data.first_name} ${response.data.last_name}`;
+    sectionElements['articleSection'].firstElementChild.innerText = `${response.data.first_name} ${response.data.last_name} mediates`;
   }
 }
 
