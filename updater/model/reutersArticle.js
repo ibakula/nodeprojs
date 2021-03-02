@@ -23,8 +23,8 @@ class ReutersArticleModel extends Model {
         if (!element.children[i].hasAttributes()) {
           continue;
         }
-        for (let i = element.children[i].attributes.length-1; i > -1; --i) {
-          element.children[i].removeAttributeNode(element.children[i].attributes.item(i));
+        for (let u = element.children[i].attributes.length-1; u > -1; --u) {
+          element.children[i].removeAttributeNode(element.children[i].attributes.item(u));
         }
       }
       text += element.innerHTML + "<br /><br />";
