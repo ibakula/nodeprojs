@@ -27,17 +27,14 @@ class BbcArticleModel extends Model {
     }
     let title = this.dom.window.document.body.querySelector("#caas-content-body article header h1");
     if (title == null) {
-    console.log("HERE2");
       return { 'title': '', 'text': '' };
     }
     title = title.innerHTML;
     if (title.length == 0) {
-    console.log("HERE3");
       return { 'title': '', 'text': '' };
     }
     let time = article.parentElement.firstElementChild.querySelector("time");
     if (time == null) {
-    console.log("HERE4");
       return { 'title': '', 'text': '' };
     }
     time = time.innerHTML;
