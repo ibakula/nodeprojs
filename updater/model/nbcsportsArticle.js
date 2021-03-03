@@ -22,6 +22,9 @@ class BbcArticleModel extends Model {
   get articleData() {
     const article = this.dom.window.document.body
     .querySelector("#nbcsports-content-wrapper #content main article > div");
+    if (article == null) {
+      return { 'title': '', 'text': '' };
+    }
     let title = article.parentElement.firstElementChild.firstElementChild;
     if (title == null) {
       return { 'title': '', 'text': '' };
@@ -45,6 +48,11 @@ class BbcArticleModel extends Model {
     }
 
     let text = "";
+    const img = article.parentElement.querySelector("header img");
+    if (img != null) {
+      text += '<img width="430px" height="300px" src="' + img.getAttribute("src") + '" />';
+    }
+
     for (let i = 0; i < article.children.length; ++i) {
       if (article.children[i].tagName != "P") {
         continue;
