@@ -3,7 +3,7 @@ const contentParser = require('../model/ContentParser.js');
 
 class Main {
   static extractLinks(response) {
-    let sectionName = contentParser.removeAllWordMatchesFromText(response.config.url, "/");
+    let sectionName = contentParser.extractWordBasedOnDelimiter(response.config.url, "/");
     return controller.getLatestNews(response.data, sectionName, response.config.url);
   }
 
