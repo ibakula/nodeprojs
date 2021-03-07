@@ -1,6 +1,12 @@
 const Database = require('../database/database.js');
 const bbcLatest = require('../model/bbc.js');
 const bbcArticle = require('../model/bbcArticle.js');
+const nbcLatest = require('../model/nbcsports.js');
+const nbcArticle = require('../model/nbcsportsArticle.js');
+const reutersLatest = require('../model/reuters.js');
+const reutersArticle = require('../model/reutersArticle.js');
+const yahooLatest = require('../model/yahoo.js');
+const yahooArticle = require('../model/yahooArticle.js');
 const contentParser = require('../model/ContentParser.js');
 const QueryString = require('querystring');
 const axios = require('axios');
@@ -39,9 +45,24 @@ class Controller {
       axios.get(link)
       .then(response => {
         let model = null;
-        if (response.config.url.search("bbc")) {
+        if (response.config.url.search("bbc") != -1) {
           model = new bbcArticle(response.data, link);
           resolve(model.articleData);
+        }
+        else if (response.config.url.search("yahoo") != -1) {
+          model = new yahooArticle(response.data, link);
+          resolve(model.articleData);
+        }
+        else if (response.config.url.search("nbcsports") != -1) {
+          model = new nbcArticle(response.data, link);
+          resolve(model.articleData);
+        }
+        else if (response.config.url.search("reuters") != -1) {
+          model = new reutersArticle(response.data, link);
+          resolve(model.articleData);
+        }
+        else {
+          reject(new Error(`Could not create an article model from: ${response.config.url}`));
         }
       })
       .catch(error => {
@@ -64,6 +85,15 @@ class Controller {
     if (url.search("bbc") != -1) {
       model = new bbcLatest(html, sectionName, url);
     }
+    else if (url.search("yahoo") != -1) {
+      model = new yahooLatest(html, sectionName, url);
+    }
+    else if (url.search("nbcsports") != -1) {
+      model = new nbcLatest(html, sectionName, url);
+    }
+    else if (url.search("reuters") != -1) {
+      model = new reutersLatest(html, sectionName, url);
+    }
     this.sectionModels.push(model);
     return model;
   }
@@ -71,9 +101,9 @@ class Controller {
   getLatestNews(html, sectionName, url) {
     let links = null;
     let model = this.findModel(html, sectionName, url);
-    if (url.search("bbc") != -1) {
+    //if (url.search("bbc") != -1) {
       links = model.linksToFullArticle;
-    }
+    //}
     return links;
   }
   
