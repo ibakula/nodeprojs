@@ -9,7 +9,7 @@ class BbcLatestSectionModel extends Model {
   }
   
   *newsAddressListTodayIterator() {
-    let latest = this.dom.window.document.body.querySelector("#nbcsports-main div:nth-child(3) div.content div:nth-child(2) div div div:nth-child(2) div");
+    let latest = this.dom.window.document.body.querySelector("#nbcsports-main div.content div div div div:nth-child(2) div");
     for (let i = 0; i < latest.children.length; ++i) {
       if (latest.children[i].querySelector(".play-btn") != null) {
         continue;
