@@ -24,12 +24,12 @@ class ContentParser {
     return false;
   }
 
-  static removeAllWordMatchesFromText(text, word) {
+  static extractWordBasedOnDelimiter(text, delimiter) {
     let newText = text;
-    let pos = newText.search(word);
+    let pos = newText.search(delimiter);
     while (pos != -1) {
-      newText = newText.slice(pos+word.length);
-      pos = newText.search(word);
+      newText = newText.slice(pos+delimiter.length);
+      pos = newText.search(delimiter);
     }
     return newText;
   }
