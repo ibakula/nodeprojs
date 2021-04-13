@@ -615,7 +615,7 @@ const model = {
                         next(req, res, rows, null);
                     }
                     else {
-                        next(req, res, {}, null);
+                        next(req, res, [], null);
                     }
                 }
         });
