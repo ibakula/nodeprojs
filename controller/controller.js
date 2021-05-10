@@ -4,8 +4,14 @@ const controller = {
     searchForTerm: (req, res, table, next) => {
         model.findInTable(req, res, table, controller.handleRequest);
     },
+    getMatchesCount: (req, res, table, next) => {
+        model.getMatchesCount(req, res, table, controller.handleRequest);
+    },
     selectCommentsByPostId: (req, res, next) => {
         model.selectCommentsDataByPostId(req, res, controller.handleRequest);
+    },
+    getCommentsCountById: (req, res, next) => {
+        model.getCommentsCountByPostId(req, res, controller.handleRequest);
     },
     getLastTableId: (req, res, route_name, next) => {
         next = {

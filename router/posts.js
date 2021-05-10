@@ -5,6 +5,18 @@ const router = express.Router();
 router.post('/search', (req, res, next) => {
    controller.searchForTerm(req, res, 'posts', next);
 });
+router.post('/search/count', (req, res, next) => {
+   controller.getMatchesCount(req, res, 'posts', next);
+});
+router.post('/search/fromId/:fromId/:countLimit', (req, res, next) => {
+   controller.searchForTerm(req, res, 'posts', next);
+});
+router.post('/search/toId/:toId/:countLimit', (req, res, next) => {
+   controller.searchForTerm(req, res, 'posts', next);
+});
+router.post('/search/:fromId/:countLimit', (req, res, next) => {
+   controller.searchForTerm(req, res, 'posts', next);
+});
 router.get('/last', (req, res, next) => {
    controller.getLastTableId(req, res, 'posts', next);
 });

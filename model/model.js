@@ -64,7 +64,7 @@ function escapeSpecificCharacters(term) {
   return sentence;
 }
 
-function separateTermsForSqlQuery(term, table) {
+function separateTermsForSqlQuery(term, table, fromId = -1, toId = -1, countLimit = 10) {
   let nextPos = -1;
   let termArr = [];
   let params = {};
@@ -110,7 +110,18 @@ function separateTermsForSqlQuery(term, table) {
     sql += ' OR ';
   }
   sql = sql.slice(0, (sql.length-4));
-  sql += ` ORDER BY id DESC LIMIT 10;`;
+
+  if (toId != -1) {
+    sql += ` AND id < ${toId}`;
+  }
+
+  if (fromId != -1) {
+    sql += ` AND id > ${fromId}`;
+  }
+  else {
+    sql += ` ORDER BY id DESC`;
+  }
+  sql += ` LIMIT ${countLimit};`;
   return sql;
 }
 
@@ -209,7 +220,10 @@ function createUpdateStatementBasedOnTableName(table, params, id) {
             ('date' in params ? `date = '${params.date}' ` : "");
             break;
         case `users`:
-            let password = md5(params.password);
+            let password = null;
+            if ('password' in params) {
+                password = md5(params.password);
+            }
             sqlSet += ('firstName' in params ? `first_name = '${params.firstName}', ` : '') +
             ('lastName' in params ? `last_name = '${params.lastName}', ` : '') +
             ('password' in params ? `password = '${password}', ` : '') +
@@ -298,8 +312,8 @@ const model = {
         }
         
         let term2 = escapeSpecificCharacters(req.body.term);
-        let sql = separateTermsForSqlQuery(term2, table);
-       
+        let sql = separateTermsForSqlQuery(term2, table, req.params.fromId, req.params.toId, req.params.countLimit);
+
         db.all(sql, 
           (err, rows) => {
               if (err) {
@@ -309,12 +323,63 @@ const model = {
               }
               else {
                   if (rows && rows.length > 0) {
-                      next(req, res, rows, null);
+                      next(req, res, (req.params.fromId != null ? rows.reverse() : rows), null);
                   }
                   else {
-                      next(req, res, {}, null);
+                      next(req, res, [], null);
                   }
               }
+        });
+    },
+    getMatchesCount: (req, res, table, next) => {
+        if (!('term' in req.body)) {
+            next(req, res, {'result':'Failed!',
+            'reason':'input compliance fallthrough'}, null);
+            return;
+        }
+        // Validity function passed params 
+        //are intentionally contrived and fully valid
+        let params = { 'text' : req.body.term };
+        if (!containsValidInput('posts', params)) {
+          next(req, res, {'result':'Failed!',
+          'reason':'input compliance fallthrough'}, null);
+          return;
+        }
+
+        let term2 = escapeSpecificCharacters(req.body.term);
+        let sql = separateTermsForSqlQuery(term2, table);
+        sql = sql.replace("SELECT *", "SELECT COUNT(*)");
+        let pos = sql.search("ORDER BY");
+        if (pos != -1) {
+            sql = sql.slice(0, (pos-1)) + ";";
+        }
+        
+        db.get(sql, 
+            (err, row) => {
+                if (err) {
+                    next(req, res, { count: 0 }, null);
+                }
+                else {
+                    next(req, res, { count: row["COUNT(*)"] }, null);
+                }
+            });
+    },
+    getCommentsCountByPostId: (req, res, next) => {
+        // Validity check, prevent execution of a query if false
+        if (!containsValidInput('comments', req.params)) {
+            next.handleRequest(req, res, {'result':'Failed!',
+            'reason':'input compliance fallthrough'}, null);
+            return;
+        }
+        
+        db.get(`SELECT COUNT(*) FROM comments WHERE post_id = '${req.params.postId}';`, 
+        (err, row) => {
+            if (err) {
+                next(req, res, { count: 0 }, null);
+            }
+            else {
+                next(req, res, { count: row["COUNT(*)"] }, null);
+            }
         });
     },
     selectCommentsDataByPostId: (req, res, next) => {
@@ -324,8 +389,30 @@ const model = {
             'reason':'input compliance fallthrough'}, null);
             return;
         }
+
+        let sql = `SELECT * FROM comments WHERE post_id = '${req.params.postId}' `;
+        if ('fromCommentId' in req.params) {
+            if (req.params.fromCommentId != 0) {
+                sql += `AND id > ${req.params.fromCommentId} `;
+            }
+            else {
+                sql += "ORDER BY id DESC ";
+            }
+        }
         
-        db.all(`SELECT * FROM comments WHERE post_id = '${req.params.postId}' ORDER BY id DESC LIMIT 10;`, 
+        if ('toCommentId' in req.params) {
+            sql += `AND id < ${req.params.toCommentId} ORDER BY id DESC `;
+        }
+        
+        if ('countLimit' in req.params) {
+            sql += `LIMIT ${req.params.countLimit};`;
+        }
+        else {
+            sql += `LIMIT 10;`;
+        }
+console.log(sql);
+        
+        db.all(sql, 
           (err, rows) => {
               if (err) {
                 console.error("DB Error: couldnt fetch comments data by posts id.");
@@ -334,10 +421,11 @@ const model = {
               }
               else {
                   if (rows && rows.length > 0) {
-                      next(req, res, rows, null);
+                      console.log(rows);
+                      next(req, res, req.params.fromCommentId == 0 || 'toCommentId' in req.params ? rows : rows.reverse(), null);
                   }
                   else {
-                      next(req, res, {}, null);
+                      next(req, res, [], null);
                   }
               }
         });
@@ -373,7 +461,7 @@ const model = {
         let columns = (table == 'users' ? 'id, first_name, last_name, email, permissions, signup_date' : '*');
         db.all(`SELECT ${columns} FROM ${table} WHERE id = ${next.request.params.id};`, (err, rows) => {
             if (err != null) {
-                next.handleRequest(next.request, next.respond, {}, null);
+                next.handleRequest(next.request, next.respond, [], null);
                 console.error(`${table}: Could not complete SELECT operation!`);
                 console.error(err.message);
             }
@@ -439,7 +527,6 @@ const model = {
         }
         
         let sql = createInsertStatmentBasedOnTableName(table, next.request.body, next.request.session.userId);
-        
         db.run(sql, (err) => {
             if (err != null) {
                 next.handleRequest(next.request, next.respond, 
@@ -503,8 +590,6 @@ const model = {
         });
     },
     updateData: (table, next) => {
-        console.log(next.request.body);
-        console.log(next.request.params);
         if (!hasPermissions(table, 'UPDATE',
            ('userId' in next.request.session ? next.request.session : false),
             next.request.params)) {
@@ -545,7 +630,7 @@ const model = {
         }
         // Check validity of the data
         if (!containsValidInput('users', req.body)) {
-            next(next.request, next.respond,
+            next(req, res,
             {'result':'Failed!', 'reason':'input compliance fallthrough'},
              null);
             return;
