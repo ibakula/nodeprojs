@@ -410,7 +410,6 @@ const model = {
         else {
             sql += `LIMIT 10;`;
         }
-console.log(sql);
         
         db.all(sql, 
           (err, rows) => {
@@ -421,7 +420,6 @@ console.log(sql);
               }
               else {
                   if (rows && rows.length > 0) {
-                      console.log(rows);
                       next(req, res, req.params.fromCommentId == 0 || 'toCommentId' in req.params ? rows : rows.reverse(), null);
                   }
                   else {
