@@ -5,6 +5,15 @@ const router = express.Router();
 router.get('/last', (req, res, next) => {
    controller.getLastTableId(req, res, 'comments', next);
 });
+router.get('/post/:postId/fromId/:fromCommentId/:countLimit', (req, res, next) => {
+    controller.selectCommentsByPostId(req, res, next);
+});
+router.get('/post/:postId/toId/:toCommentId/:countLimit', (req, res, next) => {
+    controller.selectCommentsByPostId(req, res, next);
+});
+router.get('/post/:postId/count', (req, res, next) => {
+    controller.getCommentsCountById(req, res, next);
+});
 router.get('/post/:postId', (req, res, next) => {
     controller.selectCommentsByPostId(req, res, next);
 });
