@@ -10,6 +10,7 @@ const usersRouter = require('./router/users.js');
 const userRouter = require('./router/user.js');
 const commentsRouter = require('./router/comments.js');
 const subscriptionRouter = require('./router/subscription.js');
+const errorHandler = require('./error/error_handler.js');
 const app = new express();
 
 // INDEX METHODS' ROUTES
@@ -56,5 +57,7 @@ app.use('/api/comments', commentsRouter);
 
 // SUBSCRIPTION ROUTES
 app.use('/api/subscription', subscriptionRouter);
+
+app.use('/api', errorHandler);
 
 app.listen(80);
