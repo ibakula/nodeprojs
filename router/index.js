@@ -4,6 +4,7 @@ const usersRouter = require('./router/users.js');
 const userRouter = require('./router/user.js');
 const commentsRouter = require('./router/comments.js');
 const subscriptionRouter = require('./router/subscription.js');
+const errorHandler = require('../error/error_handler');
 
 module.exports = {
   postsRouter,
@@ -11,5 +12,6 @@ module.exports = {
   usersRouter,
   userRouter,
   commentsRouter,
-  subscriptionRouter
+  subscriptionRouter,
+  errorHandler
 };

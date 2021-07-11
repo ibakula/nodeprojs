@@ -5,7 +5,6 @@ const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const sessionStore = require('connect-sqlite3')(session);
 const routes = require('./router/index.js');
-const errorHandler = require('./error/error_handler.js');
 const app = new express();
 
 // INDEX METHODS' ROUTES
@@ -53,6 +52,6 @@ app.use('/api/comments', routes.commentsRouter);
 // SUBSCRIPTION ROUTES
 app.use('/api/subscription', routes.subscriptionRouter);
 
-app.use('/api', errorHandler);
+app.use('/api', routes.errorHandler);
 
 app.listen(80);
