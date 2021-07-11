@@ -4,12 +4,7 @@ const serveStatic = require('serve-static');
 const session = require('express-session');
 const cookieParser = require('cookie-parser');
 const sessionStore = require('connect-sqlite3')(session);
-const postsRouter = require('./router/posts.js');
-const categoriesRouter = require('./router/categories.js');
-const usersRouter = require('./router/users.js');
-const userRouter = require('./router/user.js');
-const commentsRouter = require('./router/comments.js');
-const subscriptionRouter = require('./router/subscription.js');
+const routes = require('./router/index.js');
 const errorHandler = require('./error/error_handler.js');
 const app = new express();
 
@@ -41,22 +36,22 @@ app.use('/api', session({
 }));
 
 // USER METHODS' ROUTES
-app.use('/api/user', userRouter);
+app.use('/api/user', routes.userRouter);
 
 // POSTS METHODS' ROUTES
-app.use('/api/posts', postsRouter);
+app.use('/api/posts', routes.postsRouter);
 
 // CATEGORIES METHODS' ROUTES
-app.use('/api/categories', categoriesRouter);
+app.use('/api/categories', routes.categoriesRouter);
 
 // USERS METHODS' ROUTES
-app.use('/api/users', usersRouter);
+app.use('/api/users', routes.usersRouter);
 
 // COMMENTS METHODS' ROUTES
-app.use('/api/comments', commentsRouter);
+app.use('/api/comments', routes.commentsRouter);
 
 // SUBSCRIPTION ROUTES
-app.use('/api/subscription', subscriptionRouter);
+app.use('/api/subscription', routes.subscriptionRouter);
 
 app.use('/api', errorHandler);
 
