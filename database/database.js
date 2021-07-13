@@ -8,7 +8,7 @@ function openDatabase(filePath) {
     db = new sqlite.Database(filePath, err => {
       if (err) {
         let err2 = new VError(err, "Database open request failed");
-        reject(err);
+        reject(err2);
         return;
       }
       resolve({
@@ -54,7 +54,7 @@ class Database {
             reject(new VError(err, `${taskName} operation has failed to execute`));
             return;
           }
-            resolve(rows);
+          resolve(rows);
         });
       });
     }
